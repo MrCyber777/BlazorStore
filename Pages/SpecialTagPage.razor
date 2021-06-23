@@ -1,15 +1,15 @@
-﻿@page "/category"
-@inject CategoryService _db
+﻿@page "/specialtag"
+@inject SpecialTagService _db
 <div class="container-fluid p-4">
     <div class="row justify-content-between border border-info">
         <div class="col-sm-12 col-md-5">
-            <h1 class="text-info">Category List</h1>
+            <h1 class="text-info">SpecialTag List</h1>
         </div>
         <div class="col-sm-12 col-md-3 text-right">
-            <button type="button" class="btn btn-info form-control my-2" @onclick="AddNewCategory">Add new category</button>
+            <button type="button" class="btn btn-info form-control my-2" @onclick="AddNewSpecialTag">Add a new special tag</button>
         </div>
     </div>
-    @if (categories is null)
+    @if (specialTags is null)
     {
         <div class="row">
             <div class="col text-center">
@@ -17,24 +17,25 @@
             </div>
         </div>
     }
-    else if (categories.Any())
+    else if (specialTags.Any())
     {
         <div class="row">
             <table class="table table-striped">
                 <thead class="bg-info">
                     <tr>
-                        <th>Category name:</th>
+                        <th>Special tag name:</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in categories)
+                    @foreach (var item in specialTags)
                     {
                         <tr>
                             <td>@item.Name</td>
                             <td class="text-right">
-                                <button class="btn btn-primary" type="button" @onclick="(()=>EditCategoryHandler(item))">Edit</button>
-                                <button class="btn btn-danger" type="button" @onclick="(()=>DeleteCategoryHandler(item))">Delete</button>
+                                <button class="btn btn-primary" type="button" @onclick="(()=>EditSpecialTagHandler(item))">Update</button>                               
+                                <button class="btn btn-primary"type="button" @onclick="(()=>DetailsSpecialTagHandler(item))">Details</button>                             
+                                <button class="btn btn-danger"  type="button" @onclick="(()=>DeleteSpecialTagHandler(item))">Delete</button>
                             </td>
                         </tr>
                     }
@@ -43,7 +44,7 @@
                     <tr>
                         <td></td>
                         <td>
-                            Category Count: @categories.Count
+                            SpecialTags Count: @specialTags.Count
                         </td>
                     </tr>
                 </tfoot>
@@ -59,17 +60,16 @@
         </div>
     }
 </div>
-
 @if (showModal)
 {
     <div class="modal" tabindex="-1" style="display:block;">
 
-        <EditForm Model="categoryObj" OnValidSubmit="@ValidSubmitHandler">
-
+        <EditForm Model="specialTagObj" OnValidSubmit="@ValidSubmitHandler">
+           
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title  text-info">@((categoryObj.Id.Equals(0)) ? "Create" : "Update") Category</h4>
+                        <h4 class="modal-title  text-info">@((specialTagObj.Id.Equals(0)) ? "Create" : "Update") Special Tag</h4>                  
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="CloseModal">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -78,12 +78,12 @@
                         <DataAnnotationsValidator />
                         <ValidationSummary />
                         <div class="row">
-                            <div class="col-4">Category Name</div>
+                            <div class="col-4">Special Tag</div>
                             <div class="col">
                                 @* @bind-Value создаёт в автоматическом режиме делегат и событие @onchange, которое невозможно изменить *@
                                 @* @bind создаёт по умолчанию делегат и событие @onchange, который можно изменить на свой, путём указания @bind:event *@
-                                <InputText type="text" class="form-control" @bind-Value="categoryObj.Name" />
-                                <ValidationMessage For="@(() => categoryObj.Name)" />
+                                <InputText type="text" class="form-control" @bind-Value="specialTagObj.Name" />
+                                <ValidationMessage For="@(() =>specialTagObj.Name)" />
                             </div>
                         </div>
                     </div>
@@ -96,65 +96,61 @@
 
         </EditForm>
     </div>
-
 }
 
 
-
-
 @code {
-    List<Category> categories;
-    Category categoryObj = new();
+    List<SpecialTag> specialTags;
+    SpecialTag specialTagObj = new();
     bool showModal = false;
-
+ 
 
     protected override async Task OnInitializedAsync()
     {
-        categories = await _db.GetAllCategoriesAsync();
+        specialTags = await _db.GetAllSpecialTagsAsync();
     }
-    void AddNewCategory()
+    void AddNewSpecialTag()
     {
-        categoryObj = new();
-
-        categoryObj.Id = 0;
-
+        specialTagObj = new();
+        specialTagObj.Id = 0;
         showModal = true;
     }
     void CloseModal()
     {
         showModal = false;
     }
-
     async Task ValidSubmitHandler()
     {
-        // 1. Создаём локальную переменную для сохранения результата сохранения/редактирования категории
         bool result = false;
-        // 2. Скрываем модальное окно
         showModal = false;
-        // 3. Реализовать проверку, создаём ли, либо редактируем категорию и, исходя из ответа вызвать нужный метод обработки из сервисов
-        if (categoryObj.Id.Equals(0))
+        if (specialTagObj.Id.Equals(0))
         {
-            result = await _db.CreateCategoryAsync(categoryObj);
+            result = await _db.CreateSpecialTagAsync(specialTagObj);
         }
         else
         {
-            result = await _db.UpdateCategoryAsync(categoryObj);
+            result = await _db.UpdateSpecialTagAsync(specialTagObj);
         }
-
-        // 4. Обновить список всех категорий
-        categories = await _db.GetAllCategoriesAsync();
+        specialTags = await _db.GetAllSpecialTagsAsync();
     }
-    void EditCategoryHandler(Category catForEdit)
+    void EditSpecialTagHandler(SpecialTag specialTagForEdit)
     {
-        categoryObj = catForEdit;
+        specialTagObj = specialTagForEdit;
         showModal = true;
     }
-    async Task DeleteCategoryHandler(Category catForDeletion)
+    async Task DeleteSpecialTagHandler(SpecialTag specialTagForDeletion)
     {
         bool result = false;
-        result = await _db.DeleteCategoryAsync(catForDeletion);
-        categories.Clear();
-        categories = await _db.GetAllCategoriesAsync();
+        result = await _db.DeleteSpecialTagAsync(specialTagForDeletion);
+        specialTags.Clear();
+        specialTags = await _db.GetAllSpecialTagsAsync();
+    }
+    async Task DetailsSpecialTagHandler(SpecialTag specialTagDetails)
+    {
+        bool result = false;
+        specialTagObj = specialTagDetails;
+        result = await _db.GetDetailsTagAsync(specialTagDetails);
+        showModal = true;
     }
 
 }
