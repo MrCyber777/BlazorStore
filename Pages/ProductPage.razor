@@ -1,0 +1,156 @@
+﻿@page "/product"
+@inject ProductService _db
+@using BlazorInputFile
+@using System.IO
+
+
+<div class="container-fluid p-4">
+    <div class="row justify-content-between border border-info">
+        <div class="col-sm-12 col-md-5">
+            <h1 class="text-info">Products List</h1>
+        </div>
+        <div class="col-sm-12 col-md-3 text-right">
+            <button type="button" class="btn btn-info form-control my-2" @onclick="AddNewProduct">Add new product</button>
+        </div>
+    </div>
+    @if (products is null)
+    {
+        <div class="row">
+            <div class="col text-center">
+                <img src="https://media2.giphy.com/media/3oEjI6SIIHBdRxXI40/200.gif" height="200" />
+            </div>
+        </div>
+    }
+    else if (products.Any())
+    {
+        <div class="row">
+            <table class="table table-striped">
+                <thead class="bg-info">
+                    <tr>
+                        <th>Product name:</th>
+                        <th>Category name:</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in products)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>@item.Category</td>
+                            <td>@item.Price</td>
+                            <td>@item.ShadeColor</td>
+                            <td>@item.Image</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td>
+                            Product Count: @products.Count
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col text-center">
+                <img src="https://cdn.dribbble.com/users/1231865/screenshots/11157048/media/bc9427646c632ded563ee076fdc5dfda.jpg?compress=1&resize=400x300" height="200" />
+            </div>
+        </div>
+    }
+</div>
+
+@if (showModal)
+{   
+    if (isDetails)
+    {
+        <DetailsModalProduct productObj="productObj" OnCloseModal="CloseModal" />
+    }
+    else
+    {
+        <AddEditModalProduct productObj="productObj" OnCloseModal="CloseModal" OnValidSubmitHandler="ValidSubmitHandler" />
+    }
+}
+
+
+
+
+@code {
+    List<Product> products;
+    Product productObj = new();
+    bool showModal = false;
+    public byte[] ImageUploaded { get; set; }
+    bool isDetails = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        products = await _db.GetAllProductsAsync();
+    }
+    void AddNewProduct()
+    {
+        productObj = new();
+        productObj.Id = 0;
+        showModal = true;
+    }
+    void CloseModal()
+    {
+        showModal = false;
+        isDetails = false;       
+    }
+    async Task HandleSelection(IFileListEntry[] files)
+    {
+        var file = files.FirstOrDefault();
+        if (file is not null)
+        {
+            MemoryStream memoryStream = new();
+            await file.Data.CopyToAsync(memoryStream);
+            ImageUploaded = memoryStream.ToArray();
+        }
+    }
+    string ImageToDisplayConverter(byte[] image)
+    {
+        if (image is null)
+            return "";
+        var base64 = Convert.ToBase64String(image);
+        var finalString = string.Format("data:image/jpg;base64,{0}", base64);
+
+        return finalString;
+    }
+    async Task ValidSubmitHandler()
+    {
+        bool result = false;
+        showModal = false;
+        if (productObj.Id.Equals(0))
+        {
+            result = await _db.CreateProductAsync(productObj);
+        }
+        else
+        {
+            result = await _db.UpdateProductAsync(productObj);
+        }
+        products = await _db.GetAllProductsAsync();
+    }
+    void EditProductHandler(Product productForEdit)
+    {
+        productObj = productForEdit;
+        showModal = true;
+    }
+    async Task DeleteProductHandler(Product productForDeletion)
+    {
+        bool result = false;
+        result = await _db.DeleteProductAsync(productForDeletion);
+        products.Clear();
+        products = await _db.GetAllProductsAsync();
+    }
+    void DetailsProductHandler(Product productDetails)
+    {
+        productObj = productDetails;
+        isDetails = true;
+        showModal = true;
+    }
+}
+

@@ -33,9 +33,9 @@
                         <tr>
                             <td>@item.Name</td>
                             <td class="text-right">
-                                <button class="btn btn-primary" type="button" @onclick="(()=>EditSpecialTagHandler(item))">Update</button>                               
-                                <button class="btn btn-primary"type="button" @onclick="(()=>DetailsSpecialTagHandler(item))">Details</button>                             
-                                <button class="btn btn-danger"  type="button" @onclick="(()=>DeleteSpecialTagHandler(item))">Delete</button>
+                                <button class="btn btn-primary" type="button" @onclick="(()=>EditSpecialTagHandler(item))">Update</button>
+                                <button class="btn btn-primary" type="button" @onclick="(()=>DetailsSpecialTagHandler(item))">Details</button>
+                                <button class="btn btn-danger" type="button" @onclick="(()=>DeleteSpecialTagHandler(item))">Delete</button>
                             </td>
                         </tr>
                     }
@@ -62,48 +62,25 @@
 </div>
 @if (showModal)
 {
-    <div class="modal" tabindex="-1" style="display:block;">
 
-        <EditForm Model="specialTagObj" OnValidSubmit="@ValidSubmitHandler">
-           
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title  text-info">@((specialTagObj.Id.Equals(0)) ? "Create" : "Update") Special Tag</h4>                  
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="CloseModal">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary />
-                        <div class="row">
-                            <div class="col-4">Special Tag</div>
-                            <div class="col">
-                                @* @bind-Value создаёт в автоматическом режиме делегат и событие @onchange, которое невозможно изменить *@
-                                @* @bind создаёт по умолчанию делегат и событие @onchange, который можно изменить на свой, путём указания @bind:event *@
-                                <InputText type="text" class="form-control" @bind-Value="specialTagObj.Name" />
-                                <ValidationMessage For="@(() =>specialTagObj.Name)" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="CloseModal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save changes</button>
-                    </div>
-                </div>
-            </div>
-
-        </EditForm>
-    </div>
+    if (isDetails)
+    {
+        <DetailsModalSpecialTag specialTagObj="specialTagObj" OnCloseModal="CloseModal" />
+    }
+    else
+    {
+        <AddEditModalSpecialTag specialTagObj="specialTagObj" OnCloseModal="CloseModal" OnValidSubmitHandler="ValidSubmitHandler" />
+    }
 }
+
 
 
 @code {
     List<SpecialTag> specialTags;
     SpecialTag specialTagObj = new();
     bool showModal = false;
- 
+    bool isDetails = false;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -118,6 +95,7 @@
     void CloseModal()
     {
         showModal = false;
+        isDetails = false;
     }
     async Task ValidSubmitHandler()
     {
@@ -145,12 +123,12 @@
         specialTags.Clear();
         specialTags = await _db.GetAllSpecialTagsAsync();
     }
-    async Task DetailsSpecialTagHandler(SpecialTag specialTagDetails)
-    {
-        bool result = false;
+    void  DetailsSpecialTagHandler(SpecialTag specialTagDetails)
+    {      
         specialTagObj = specialTagDetails;
-        result = await _db.GetDetailsTagAsync(specialTagDetails);
+        isDetails = true;
         showModal = true;
+
     }
 
 }

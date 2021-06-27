@@ -11,5 +11,6 @@ namespace BlazorStore.Data
         }
         public DbSet<Category> Categories { get; set; }
         public DbSet<SpecialTag> SpecialTags { get; set; }
+        public DbSet<Product> Products { get; set; }
     }
 }

@@ -55,15 +55,6 @@ namespace BlazorStore.Data.Services
             await _db.SaveChangesAsync();
 
             return true;
-        }
-      public async Task<bool> GetDetailsTagAsync( SpecialTag specialTagDetails)
-        {
-            if (specialTagDetails == null)
-                return false;
-            SpecialTag specialTag = await _db.SpecialTags.FindAsync(specialTagDetails.Id);
-            if (specialTag == null)
-                return false;
-            return true;
-        }
+        }     
     }
 }

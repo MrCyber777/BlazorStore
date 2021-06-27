@@ -1,0 +1,52 @@
+﻿<div class="modal" tabindex="-1" style="display:block;">
+
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title  text-info">Product Details</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="OnCloseModal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row form-group">
+                    <div class="col-3">Product Name</div>
+                    <div class="col-5">
+                        <input type="text" class="form-control" @bind="productObj.Name" />
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-3">Category Name</div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-3">Price</div>
+                    <div class="col-5">
+                        <input type="text" class="form-control" @bind="productObj.Price" />
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-3">ShadeColor</div>
+                    <div class="col-5">
+                        <input type="text" class="form-control" @bind="productObj.ShadeColor" />
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-3">Image</div>
+                    <div class="col-5">
+                        <BlazorInputFile.InputFile OnChange="OnHandleSelection" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="OnCloseModal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter] public Product productObj { get; set; }
+    [Parameter] public EventCallback OnCloseModal { get; set; }
+    [Parameter] public EventCallback OnHandleSelection { get; set; }
+
+}

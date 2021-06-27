@@ -1,0 +1,42 @@
+﻿<div class="modal" tabindex="-1" style="display:block;">
+
+    <EditForm Model="specialTagObj" OnValidSubmit="@OnValidSubmitHandler">
+
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title  text-info">@((specialTagObj.Id.Equals(0)) ? "Create" : "Update") Special Tag</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="OnCloseModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="row">
+                        <div class="col-4">Special Tag</div>
+                        <div class="col">
+                            @* @bind-Value создаёт в автоматическом режиме делегат и событие @onchange, которое невозможно изменить *@
+                            @* @bind создаёт по умолчанию делегат и событие @onchange, который можно изменить на свой, путём указания @bind:event *@
+                            <InputText type="text" class="form-control" @bind-Value="specialTagObj.Name" />
+                            <ValidationMessage For="@(() =>specialTagObj.Name)" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal" @onclick="OnCloseModal">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="OnCloseModal">Close</button>
+                </div>
+            </div>
+        </div>
+
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public SpecialTag specialTagObj { get; set; }
+    [Parameter] public EventCallback OnCloseModal { get; set; }
+    [Parameter] public EventCallback OnValidSubmitHandler { get; set; }
+
+
+}
