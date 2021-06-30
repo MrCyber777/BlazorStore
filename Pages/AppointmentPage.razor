@@ -1,0 +1,121 @@
+﻿@page "/appointment"
+@inject AppointmentService _db 
+<div class="container-fluid p-4">
+    <div class="row justify-content-between border border-info">
+        <div class="col-sm-12 col-md-5">
+            <h1 class="text-info">Appointment List</h1>
+        </div>
+        <div class="col-sm-12 col-md-3 text-right">
+            @*//TODO*@
+        </div>
+    </div>
+    @if (appointments is null)
+    {
+        <div class="row">
+            <div class="col text-center">
+                <img src="https://media2.giphy.com/media/3oEjI6SIIHBdRxXI40/200.gif" height="200" />
+            </div>
+        </div>
+    }
+    else if (appointments.Any())
+    {
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-striped border">
+                    <thead class="bg-info">
+                        <tr>Sales Person</tr>
+                        <tr>CustomerSurname</tr>
+                        <tr>AppointmentDay</tr>
+                        <tr>CustomerName</tr>
+                        <tr>CustomerPhoneNumber</tr>
+                        <tr>CustomerEmail</tr>
+                        <tr>Address</tr>
+                        <tr>Zip</tr>
+                        <tr>City</tr>
+                        <tr>Country</tr>
+                        <tr>IsConfirmed</tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in appointments)
+                        {
+                            <tr>
+                                <td>@item.CustomerName</td>
+                                <td>@item.CustomerSurname</td>
+                                <td>@item.AppointmentDay</td>
+                                @*//TODO*@
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                Appointment Count: @appointments.Count
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col text-center">
+                <img src="https://cdn.dribbble.com/users/1231865/screenshots/11157048/media/bc9427646c632ded563ee076fdc5dfda.jpg?compress=1&resize=400x300" height="200" />
+            </div>
+        </div>
+    }
+</div>
+@code {
+    List<Appointment> appointments;
+    Appointment appointmentObj = new();
+    bool showModal = false;
+    bool isDetails = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        appointments = await _db.GetAllAppointmentsAsync();
+    }
+    void CloseModal()
+    {
+        showModal = false;
+        isDetails = false;
+    }
+    async Task ValidSubmitHandler()
+    {
+        bool result = false;
+        showModal = false;
+
+        if (appointmentObj.Id.Equals(0))
+        {
+            result = await _db.CreateAppointmentAsync(appointmentObj);
+        }
+        else
+        {
+            result = await _db.UpdateAppointmentAsync(appointmentObj);
+        }
+        appointments = await _db.GetAllAppointmentsAsync();
+    }
+    void EditAppointmentHandler(Appointment appointmentForEdit)
+    {
+        appointmentObj = appointmentForEdit;
+        showModal = true;
+    }
+    async Task DeleteAppointmentHandler(Appointment appointmentForDeletion)
+    {
+        bool result = false;
+        result = await _db.DeleteAppointmentAsync(appointmentForDeletion);
+        appointments.Clear();
+        appointments = await _db.GetAllAppointmentsAsync();
+    }
+    void DetailsAppointmentHandler(Appointment appointmentForDetails)
+    {
+        appointmentObj = appointmentForDetails;
+        isDetails = true;
+        showModal = true;
+    }
+}

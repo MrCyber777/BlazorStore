@@ -1,0 +1,45 @@
+﻿<div class="modal" tabindex="-1" style="display:block;">
+
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title  text-info">Appointment Details</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="OnCloseModal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row form-group">
+                    <div class="col-3">CustomerName</div>
+                    <div class="col-5">
+                        <input type="text" class="form-control" @bind="appointmentObj.CustomerName" />
+                    </div>
+                </div>
+
+                <div class="row form-group">
+                    <div class="col-3">CustomerSurname</div>
+                    <div class="col-5">
+                        <input type="text" class="form-control" @bind="appointmentObj.CustomerSurname" />
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-3">CustomerPhoneNumber</div>
+                    <div class="col-5">
+                        <input type="text" class="form-control" @bind="appointmentObj.CustomerPhoneNumber" />
+                    </div>
+                </div>
+                @*//TODO*@
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="OnCloseModal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter] public Appointment appointmentObj { get; set; }
+    [Parameter] public EventCallback OnCloseModal { get; set; }
+    [Parameter] public EventCallback OnHandleSelection { get; set; }
+}

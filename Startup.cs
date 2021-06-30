@@ -45,6 +45,7 @@ namespace BlazorStore
             services.AddScoped<CategoryService>();
             services.AddScoped<SpecialTagService>();
             services.AddScoped<ProductService>();
+            services.AddScoped<AppointmentService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

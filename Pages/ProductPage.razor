@@ -27,24 +27,30 @@
             <table class="table table-striped">
                 <thead class="bg-info">
                     <tr>
+                        <th>Image:</th>
                         <th>Product name:</th>
                         <th>Category name:</th>
+                        <th>Price:</th>
+                        <th>Shade Color:</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in products)
                     {
-                        <tr>
-                            <td>@item.Name</td>
-                            <td>@item.Category</td>
-                            <td>@item.Price</td>
-                            <td>@item.ShadeColor</td>
-                            <td>@item.Image</td>
-                        </tr>
+                    <tr>
+                        <td>@item.Image</td>
+                        <td>@item.Name</td>
+                        <td>@item.Category.Name</td>
+                        <td>@item.Price</td>
+                        <td>@item.ShadeColor</td>
+                    </tr>
                     }
                 </tbody>
                 <tfoot>
                     <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
                         <td></td>
                         <td>
                             Product Count: @products.Count
@@ -68,11 +74,11 @@
 {   
     if (isDetails)
     {
-        <DetailsModalProduct productObj="productObj" OnCloseModal="CloseModal" />
+        <DetailsModalProduct productObj="@productObj" OnCloseModal="CloseModal" />
     }
     else
     {
-        <AddEditModalProduct productObj="productObj" OnCloseModal="CloseModal" OnValidSubmitHandler="ValidSubmitHandler" />
+        <AddEditModalProduct productObj="productObj" OnCloseModal="CloseModal" OnValidSubmitHandler="ValidSubmitHandler" Categories="categories" SpecialTags="specialTags" OnSelectionCategoryChanged="SelectionCategoryChanged" OnSelectionSpecialTagsChanged="SelectionSpecialTagsChanged" />
     }
 }
 
@@ -81,14 +87,18 @@
 
 @code {
     List<Product> products;
+    List<SpecialTag> specialTags;
+    List<Category> categories;
     Product productObj = new();
     bool showModal = false;
     public byte[] ImageUploaded { get; set; }
     bool isDetails = false;
-    
+
     protected override async Task OnInitializedAsync()
     {
         products = await _db.GetAllProductsAsync();
+        specialTags = await _db.GetAllSpecialTagsAsync();
+        categories = await _db.GetAllCategoriesAsync();
     }
     void AddNewProduct()
     {
@@ -99,19 +109,19 @@
     void CloseModal()
     {
         showModal = false;
-        isDetails = false;       
+        isDetails = false;
     }
-    async Task HandleSelection(IFileListEntry[] files)
+    async Task HandleSelection(IFileListEntry[] files)//  Асинхронный метод, который обрабатывает файлы загруженные через форму 
     {
         var file = files.FirstOrDefault();
         if (file is not null)
         {
             MemoryStream memoryStream = new();
-            await file.Data.CopyToAsync(memoryStream);
-            ImageUploaded = memoryStream.ToArray();
+            await file.Data.CopyToAsync(memoryStream);// асинхронно скопировать картинку в ОП
+            ImageUploaded = memoryStream.ToArray();//Преобразование картинки в массив байтов
         }
     }
-    string ImageToDisplayConverter(byte[] image)
+    string ImageToDisplayConverter(byte[] image)// Метод преобразования массива байтов обратно в картинку
     {
         if (image is null)
             return "";
@@ -124,6 +134,7 @@
     {
         bool result = false;
         showModal = false;
+
         if (productObj.Id.Equals(0))
         {
             result = await _db.CreateProductAsync(productObj);
@@ -152,5 +163,20 @@
         isDetails = true;
         showModal = true;
     }
+    void SelectionCategoryChanged(ChangeEventArgs args)
+    {
+        if(int.TryParse(args.Value.ToString(),out int id))// Парсинг стринговой переменной в int
+        {
+            productObj.CategoryId = id;
+        }
+    }
+    void SelectionSpecialTagsChanged(ChangeEventArgs args)
+    {
+        if(int.TryParse(args.Value.ToString(),out int id))
+        {
+            productObj.SpecialTagId = id;
+        }
+    }
+
 }
 

@@ -1,11 +1,11 @@
 ﻿<div class="modal" tabindex="-1" style="display:block;">
 
-    <EditForm Model="productObj" OnValidSubmit="OnValidSubmitHandler">
+    <EditForm Model="appointmentObj" OnValidSubmit="OnValidSubmitHandler">
 
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title  text-info">@((productObj.Id.Equals(0)) ? "Create" : "Update") Product</h4>
+                    <h4 class="modal-title  text-info">@((appointmentObj.Id.Equals(0)) ? "Create" : "Update")Update Appointment</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="OnCloseModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -16,9 +16,10 @@
                     <div class="row form-group">
                         <div class="col-3">Product Name</div>
                         <div class="col-5">
-                            <input type="text" class="form-control" @bind-value="productObj.Name" />
+                            <input type="text" class="form-control" @bind-value="appointmentObj.CustomerName" />
                         </div>
                     </div>
+                    @*//TODO*@
 
                     <div class="row form-group">
                         <div class="col-3">Category Name</div>
@@ -63,21 +64,16 @@
                             <input type="text" class="form-control" @bind-value="productObj.ShadeColor" />
                         </div>
                     </div>
-                    <div class="row form-group">
-                        <div class="col-3">Image</div>
-                        <div class="col-5">
-                            <BlazorInputFile.InputFile OnChange="OnHandleSelection" />
-                        </div>
-                    </div>
+                   
                     <!--<div class="row">
-                    <div class="col-4">Product</div>
-                    <div class="col">-->
+    <div class="col-4">Product</div>
+    <div class="col">-->
                     @* @bind-Value создаёт в автоматическом режиме делегат и событие @onchange, которое невозможно изменить *@
                     @* @bind создаёт по умолчанию делегат и событие @onchange, который можно изменить на свой, путём указания @bind:event *@
                     <!--<InputText type="text" class="form-control" @bind-Value="productObj.Name" />
-                            <ValidationMessage For="@(() =>productObj.Name)" />
-                        </div>
-                    </div>-->
+            <ValidationMessage For="@(() =>productObj.Name)" />
+        </div>
+    </div>-->
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary" data-dismiss="modal">Save Changes</button>
@@ -92,13 +88,8 @@
 @code {
     [Parameter] public EventCallback OnCloseModal { get; set; }
     [Parameter] public EventCallback OnValidSubmitHandler { get; set; }
-    [Parameter] public EventCallback OnHandleSelection { get; set; }
-    [Parameter] public EventCallback<ChangeEventArgs> OnSelectionCategoryChanged { get; set; }
-    [Parameter] public EventCallback<ChangeEventArgs> OnSelectionSpecialTagsChanged { get; set; }
 
-
-    [Parameter] public List<Category> Categories { get; set; }
-    [Parameter] public List<SpecialTag> SpecialTags { get; set; }
-    [Parameter] public Product productObj { get; set; }
+    [Parameter] public List<Appointment> Appointments { get; set; }
+    [Parameter] public Appointment appointmentObj { get; set; }
 
 }
