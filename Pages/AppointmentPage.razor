@@ -6,7 +6,7 @@
             <h1 class="text-info">Appointment List</h1>
         </div>
         <div class="col-sm-12 col-md-3 text-right">
-            @*//TODO*@
+            @*// TODO: Search Field and input*@
         </div>
     </div>
     @if (appointments is null)
@@ -23,17 +23,17 @@
             <div class="table-responsive">
                 <table class="table table-striped border">
                     <thead class="bg-info">
-                        <tr>Sales Person</tr>
-                        <tr>CustomerSurname</tr>
-                        <tr>AppointmentDay</tr>
-                        <tr>CustomerName</tr>
-                        <tr>CustomerPhoneNumber</tr>
-                        <tr>CustomerEmail</tr>
+                        <tr>Customer Name</tr>
+                        <tr>Customer Surname</tr>
+                        <tr>Appointment Day</tr>
+                        <tr>Customer Name</tr>
+                        <tr>Customer Phone Number</tr>
+                        <tr>Customer Email</tr>
                         <tr>Address</tr>
                         <tr>Zip</tr>
                         <tr>City</tr>
                         <tr>Country</tr>
-                        <tr>IsConfirmed</tr>
+                        <tr>Is Confirmed</tr>
                     </thead>
                     <tbody>
                         @foreach (var item in appointments)
@@ -68,6 +68,17 @@
                 <img src="https://cdn.dribbble.com/users/1231865/screenshots/11157048/media/bc9427646c632ded563ee076fdc5dfda.jpg?compress=1&resize=400x300" height="200" />
             </div>
         </div>
+    }
+    @if (showModal)
+    {
+        if (isDetails)
+        {
+            <DetailsModalAppointment appointmentObj="appointmentObj" OnCloseModal="CloseModal" />
+        }
+        else
+        {
+            <AddEditModalAppointment appointmentObj="appointmentObj" OnCloseModal="CloseModal" OnValidSubmitHandler="ValidSubmitHandler"/>
+        }
     }
 </div>
 @code {

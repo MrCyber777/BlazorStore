@@ -1,0 +1,186 @@
+﻿@using System.IO
+@using BlazorInputFile
+
+<div class="modal" tabindex="-1" style="display:block;">
+    <!-- TODO: Реализовать выбор между Details, Edit, Create-->
+    <EditForm Model="productObj" OnValidSubmit="OnValidSubmitHandler">
+
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title  text-info">@((ModalState.Equals(ModalStateEnum.Create) ? "Create" : ModalState.Equals(ModalStateEnum.Edit) ? "Edit" : ModalState.Equals(ModalStateEnum.Delete) ? "Delete":ModalState.Equals(ModalStateEnum.Details)?"Details":"")) Product</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="OnCloseModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="row form-group">
+                                <div class="col-3">Product Name</div>
+                                <div class="col-5">
+                                    @if (ModalState.Equals(ModalStateEnum.Create) || ModalState.Equals(ModalStateEnum.Edit))
+                                    {
+                                        <input type="text" class="form-control" @bind-value="productObj.Name" />
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control" @bind-value="productObj.Name" readonly />
+                                    }
+
+                                </div>
+                            </div>
+
+                            <div class="row form-group">
+                                <div class="col-3">Category Name</div>
+                                <div class="col-5">
+                                    @if (ModalState.Equals(ModalStateEnum.Create) || ModalState.Equals(ModalStateEnum.Edit))
+                                    {
+                                        <select @onchange="@((args) => OnSelectionCategoryChanged.InvokeAsync(args))" class="form-control">
+                                            @if (productObj.Id.Equals(0))
+                                            {
+                                                <option value="">Select category</option>
+                                            }
+                                            @foreach (var item in Categories)
+                                            {
+                                                <option value="@item.Id" selected="@((item.Id == productObj.CategoryId) ? true : false)">@item.Name</option>
+                                            }
+                                        </select>
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control" @bind-value="productObj.Category.Name" readonly />
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="row form-group">
+                                <div class="col-3">Special Tag</div>
+                                <div class="col-5">
+                                    @if (ModalState.Equals(ModalStateEnum.Create) || ModalState.Equals(ModalStateEnum.Edit))
+                                    {
+
+                                        <select @onchange="@((args) => OnSelectionSpecialTagsChanged.InvokeAsync(args))" class="form-control">
+                                            @if (productObj.Id.Equals(0))
+                                            {
+                                                <option value="">Select Special Tag</option>
+                                            }
+                                            @foreach (var item in SpecialTags)
+                                            {
+                                                <option value="@item.Id" selected="@((item.Id == productObj.SpecialTagId) ? true : false)">@item.Name</option>
+                                            }
+                                        </select>
+                                    }
+                                    else
+                                    {
+                                        <select @onchange="@((args) => OnSelectionSpecialTagsChanged.InvokeAsync(args))" disabled class="form-control">
+                                            @if (productObj.Id.Equals(0))
+                                            {
+                                                <option value="">Select Special Tag</option>
+                                            }
+                                            @foreach (var item in SpecialTags)
+                                            {
+                                                <option value="@item.Id" selected="@((item.Id == productObj.SpecialTagId) ? true : false)">@item.Name</option>
+                                            }
+                                        </select>
+                                    }
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-3">Price</div>
+                                <div class="col-5">
+                                    @if (ModalState.Equals(ModalStateEnum.Create) || ModalState.Equals(ModalStateEnum.Edit))
+                                    {
+                                        <input type="text" class="form-control" @bind-value="productObj.Price" />
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control" @bind-value="productObj.Price" readonly />
+                                    }
+
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-3">ShadeColor</div>
+                                <div class="col-5">
+                                    @if (ModalState.Equals(ModalStateEnum.Create) || ModalState.Equals(ModalStateEnum.Edit))
+                                    {
+                                        <input type="text" class="form-control" @bind-value="productObj.ShadeColor" />
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control" @bind-value="productObj.ShadeColor" readonly />
+                                    }
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-3">Image</div>
+                                @if (ModalState.Equals(ModalStateEnum.Create) || ModalState.Equals(ModalStateEnum.Edit))
+                                {
+                                <div class="col-5">
+                                    <BlazorInputFile.InputFile OnChange="@((args) => OnHandleSelection.InvokeAsync(args))" />
+                                </div>
+                                }
+                               else
+                               {
+                            <div class="col-5">
+                                <BlazorInputFile.InputFile OnChange="@((args) => OnHandleSelection.InvokeAsync(args))" disabled />
+                            </div>
+                               }
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <img src="@ImageToDisplayConverter(productObj.Image)" style="width:100%" />
+                        </div>
+                    </div>
+
+                    <!--<div class="row">
+                    <div class="col-4">Product</div>
+                    <div class="col">-->
+                    @* @bind-Value создаёт в автоматическом режиме делегат и событие @onchange, которое невозможно изменить *@
+                    @* @bind создаёт по умолчанию делегат и событие @onchange, который можно изменить на свой, путём указания @bind:event *@
+                    <!--<InputText type="text" class="form-control" @bind-Value="productObj.Name" />
+                            <ValidationMessage For="@(() =>productObj.Name)" />
+                        </div>
+                    </div>-->
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="OnCloseModal">Close</button>
+                </div>
+            </div>
+        </div>
+
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnCloseModal { get; set; }
+    [Parameter] public EventCallback OnValidSubmitHandler { get; set; }
+    [Parameter] public EventCallback<IFileListEntry[]> OnHandleSelection { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> OnSelectionCategoryChanged { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> OnSelectionSpecialTagsChanged { get; set; }
+
+
+
+    [Parameter] public List<Category> Categories { get; set; }
+    [Parameter] public List<SpecialTag> SpecialTags { get; set; }
+    [Parameter] public Product productObj { get; set; }
+    [Parameter] public ModalStateEnum ModalState { get; set; }
+    //bool isDetails = false;
+
+
+
+    string ImageToDisplayConverter(byte[] image)// Метод преобразования массива байтов обратно в картинку
+    {
+        if (image is null)
+            return "";
+        var base64 = Convert.ToBase64String(image);
+        var finalString = string.Format("data:image/jpg;base64,{0}", base64);
+
+        return finalString;
+    }
+}

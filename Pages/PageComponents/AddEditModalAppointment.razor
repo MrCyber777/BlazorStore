@@ -21,7 +21,7 @@
                     </div>
                     @*//TODO*@
 
-                    <div class="row form-group">
+                    @*<div class="row form-group">
                         <div class="col-3">Category Name</div>
                         <div class="col-5">
                             <select @onchange="@((args) => OnSelectionCategoryChanged.InvokeAsync(args))" class="form-control">
@@ -35,9 +35,9 @@
                                 }
                             </select>
                         </div>
-                    </div>
+                    </div>*@
 
-                    <div class="row form-group">
+                    @*<div class="row form-group">
                         <div class="col-3">Special Tag</div>
                         <div class="col-5">
                             <select @onchange="@((args) => OnSelectionSpecialTagsChanged.InvokeAsync(args))" class="form-control">
@@ -63,7 +63,7 @@
                         <div class="col-5">
                             <input type="text" class="form-control" @bind-value="productObj.ShadeColor" />
                         </div>
-                    </div>
+                    </div>*@
                    
                     <!--<div class="row">
     <div class="col-4">Product</div>

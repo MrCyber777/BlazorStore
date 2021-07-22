@@ -1,6 +1,7 @@
-﻿<div class="modal" tabindex="-1" style="display:block;">
+﻿@using System.IO
+@using BlazorInputFile 
 
-
+<div class="modal" tabindex="-1" style="display:block;">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -8,39 +9,56 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="OnCloseModal">
                     <span aria-hidden="true">&times;</span>
                 </button>
-            </div>
-            <div class="modal-body">
-                <div class="row form-group">
-                    <div class="col-3">Product Name</div>
-                    <div class="col-5">
-                        <input type="text" class="form-control" @bind="productObj.Name" />
+            </div>          
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="row form-group">
+                                <div class="col-3">Product Name</div>
+                                <div class="col-9">
+                                    <input type="text" class="form-control" readonly @bind="productObj.Name" />
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-3">Category Name</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-3">Price</div>
+                                <div class="col-9">
+                                    <input type="text" class="form-control" readonly @bind="productObj.Price" />
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-3">ShadeColor</div>
+                                <div class="col-9">
+                                    <input type="text" class="form-control" readonly @bind="productObj.ShadeColor" />                                  
+                                </div>
+                                </div>  
+                            <div class="row form-group">
+                                <div class="col offset-3">
+                                    <button type="submit" class="btn btn-success form-control">Back To List</button>                                  
+                                </div>
+                                <div class="col">
+                                    <button type="submit" class="btn btn-primary form-control">Book Appointment</button>
+                                </div>
+                            </div>
+                            </div> 
+                                        
+                            <div class="col-4">
+                                <img src="@ImageToDisplayConverter(productObj.Image)" style="width:100%" />
+                            </div>                      
                     </div>
+                    @*<div class="row form-group">
+                <div class="col-3">Image</div>
+                <div class="col-5">
+                    <BlazorInputFile.InputFile OnChange="OnHandleSelection" />
                 </div>
-                <div class="row form-group">
-                    <div class="col-3">Category Name</div>
+            </div>*@
                 </div>
-                <div class="row form-group">
-                    <div class="col-3">Price</div>
-                    <div class="col-5">
-                        <input type="text" class="form-control" @bind="productObj.Price" />
-                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="OnCloseModal">Close</button>
                 </div>
-                <div class="row form-group">
-                    <div class="col-3">ShadeColor</div>
-                    <div class="col-5">
-                        <input type="text" class="form-control" @bind="productObj.ShadeColor" />
-                    </div>
-                </div>
-                <div class="row form-group">
-                    <div class="col-3">Image</div>
-                    <div class="col-5">
-                        <BlazorInputFile.InputFile OnChange="OnHandleSelection" />
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="OnCloseModal">Close</button>
-            </div>
+            
         </div>
     </div>
 </div>
@@ -48,5 +66,16 @@
     [Parameter] public Product productObj { get; set; }
     [Parameter] public EventCallback OnCloseModal { get; set; }
     [Parameter] public EventCallback OnHandleSelection { get; set; }
+
+   
+    string ImageToDisplayConverter(byte[] image)// Метод преобразования массива байтов обратно в картинку
+    {
+        if (image is null)
+            return "";
+        var base64 = Convert.ToBase64String(image);
+        var finalString = string.Format("data:image/jpg;base64,{0}", base64);
+
+        return finalString;
+    }
 
 }
