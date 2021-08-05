@@ -42,6 +42,7 @@
                                 <td>@item.CustomerName</td>
                                 <td>@item.CustomerSurname</td>
                                 <td>@item.AppointmentDay</td>
+                                <td>@item.AppointmentTime</td>                               
                                 @*//TODO*@
                             </tr>
                         }
@@ -69,7 +70,7 @@
             </div>
         </div>
     }
-    @if (showModal)
+    @*@if (showModal)
     {
         if (isDetails)
         {
@@ -79,7 +80,7 @@
         {
             <AddEditModalAppointment appointmentObj="appointmentObj" OnCloseModal="CloseModal" OnValidSubmitHandler="ValidSubmitHandler"/>
         }
-    }
+    }*@
 </div>
 @code {
     List<Appointment> appointments;
@@ -98,7 +99,7 @@
     }
     async Task ValidSubmitHandler()
     {
-        bool result = false;
+        int result =0;
         showModal = false;
 
         if (appointmentObj.Id.Equals(0))
@@ -110,6 +111,7 @@
             result = await _db.UpdateAppointmentAsync(appointmentObj);
         }
         appointments = await _db.GetAllAppointmentsAsync();
+
     }
     void EditAppointmentHandler(Appointment appointmentForEdit)
     {

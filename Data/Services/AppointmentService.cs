@@ -8,7 +8,7 @@ namespace BlazorStore.Data.Services
 {
     public class AppointmentService
     {
-        private readonly ApplicationDbContext _db;
+       private readonly ApplicationDbContext _db;
        public AppointmentService(ApplicationDbContext db)
         {
             _db = db;
@@ -23,26 +23,30 @@ namespace BlazorStore.Data.Services
             List<Appointment> appointmentsFromDB = await _db.Appointments.ToListAsync();
             return appointmentsFromDB;
         }
-        public async Task<bool>CreateAppointmentAsync(Appointment newAppointment)
+        public async Task<int>CreateAppointmentAsync(Appointment newAppointment)
         {
             if (newAppointment == null)
-                return false;
+                return 0;
             await _db.Appointments.AddAsync(newAppointment);
             await _db.SaveChangesAsync();
-            return true;
+            return newAppointment.Id;
         }
-        public async Task<bool> UpdateAppointmentAsync(Appointment appointmentForUpdate)
+        public async Task<int> UpdateAppointmentAsync(Appointment appointmentForUpdate)
         {
             if (appointmentForUpdate == null)
-                return false;
+                return 0;
             Appointment appointmentFromDB = await _db.Appointments.FirstOrDefaultAsync(x=>x.Id==appointmentForUpdate.Id);
             if (appointmentFromDB == null)
-                return false;
+                return 0;
             _db.Update(appointmentForUpdate);
             await _db.SaveChangesAsync();
 
-            return true;
+            return appointmentForUpdate.Id;
         }
+        //public async Task<bool>ConfirmAppointmentAsync(Appointment appointmentForConfirmation)
+        //{
+            
+        //}
         public async Task<bool>DeleteAppointmentAsync(Appointment appointmentForDeletion)
         {
             if (appointmentForDeletion == null)

@@ -1,0 +1,107 @@
+﻿@inherits OwningComponentBase<AppointmentService>
+@inject NavigationManager _navManager
+   
+        <div class=" p-4 row">
+            <EditForm Model="Appointment" OnValidSubmit="ValidSubmit">
+
+                <div class="row">
+                    <div class="col pb-3">
+                        <div class="form-group">
+                            <label>Name:</label>
+                            <InputText class="form-control" @bind-Value="Appointment.CustomerName" />
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Last Name:</label>
+                            <InputText class="form-control" @bind-Value="Appointment.CustomerSurname" />
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Phone Number:</label>
+                            <InputText class="form-control" @bind-Value="Appointment.CustomerPhoneNumber" />
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <InputText class="form-control" @bind-Value="Appointment.CustomerEmail" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Address:</label>
+                            <InputText class="form-control" @bind-Value="Appointment.Address" />
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>City:</label>
+                            <InputText class="form-control" @bind-Value="Appointment.City" />
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>ZIP:</label>
+                            <InputNumber class="form-control" @bind-Value="Appointment.Zip" />
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Appointment Day:</label>
+                            <InputDate class="form-control" @bind-Value="Appointment.AppointmentDay" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-3">
+                        <div class="form-group">
+                            <label>Appointment Time:</label>
+                            <input type="time" class="form-control" @bind="Appointment.AppointmentTime" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3">
+                        <div class="form-group">
+                            <button class="btn btn-danger form-control">Close</button>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-group">
+                            <button class="btn btn-success form-control">Make Appointment</button>
+                        </div>
+                    </div>
+                    <div class="col text-right">
+                        <div class="form-group">
+                            <img src="data:image/jpeg;base64,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" height="200" />
+                        </div>
+                    </div>
+                </div>             
+               
+
+
+            </EditForm>
+        </div>
+   
+
+    @code
+{
+        [Parameter] public Appointment Appointment { get; set; }
+        [Parameter] public List<Product> Products { get; set; }
+        bool showModal = false;
+
+        async Task ValidSubmit()
+        {
+            var result = await Service.CreateAppointmentAsync(Appointment);
+            if (!result.Equals(0))
+            {
+                _navManager.NavigateTo($"confirm/{result}");
+            }
+        }
+       
+    }

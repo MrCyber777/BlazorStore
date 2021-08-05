@@ -1,0 +1,139 @@
+﻿@page "/shoppingcart"
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage _protectedLocalStorage
+@inject ProductService _db
+@inject NavigationManager _navManager
+<div class="container border rounded p-2">
+    <div class="row">
+        <div class="col">
+            <h1 class="text-info">Shopping Cart</h1>
+        </div>
+    </div>
+    @if (listOfProducts is null)
+    {
+        <div class="row">
+            <div class="col text-center">
+                <img src="https://media4.giphy.com/media/3oEjI6SIIHBdRxXI40/200w.gif?cid=82a1493bg0nn71x3sx1kequ828lbtngocikpzj86t8xmhc10&rid=200w.gif&ct=g" height="200" />
+            </div>
+        </div>
+    }
+    else if (listOfProducts.Count == 0)
+    {
+        <div class="row">
+            <div class="col text-center">
+                <img src="https://image.flaticon.com/icons/png/128/2748/2748558.png" height="200" />
+            </div>
+        </div>
+    }
+    @if (listOfProducts is not null && listOfProducts.Any())
+    {
+        <div class="row">
+            <div class="col">
+                <div class="table-responsive">
+                    <table class="table table-striped border">
+                        <thead class="bg-info">
+                            <tr>
+                                <th></th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in listOfProducts)
+                            {
+                                <tr>
+                                    <td><img class="image-fluid img-thumbnail" src="@ToDisplayExtension.ImageToDisplayConverter(item.Image)" height="100" width="150" /></td>
+                                    <td>@item.Name</td>
+                                    <td>@item.Category.Name</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@string.Format("{0:C}", item.Price)</td>
+                                    <td><button class="btn btn-danger">Remove</button></td>
+                                </tr>
+
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-3">
+                        <button class="btn btn-success form-control" @onclick="MakeAppointment">Book now</button>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-bold text-info text-right">Total price:@string.Format("{0:C}", totalPrice)</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    @if (makeAppointment)
+    {
+        <AppointmentComponent Appointment="appointmentObj" Products="listOfProducts" />
+    }
+</div>
+
+   
+   
+
+
+@code
+{
+        List<Product> listOfProducts;
+        List<int> listOfShoppingCart;
+        Appointment appointmentObj = new();
+        double totalPrice = 0;
+        bool makeAppointment = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)// Срабатывает после первой отрисовки компонента
+    {
+        if (firstRender)
+            await DataInit();
+    }
+    void MakeAppointment()
+    {
+        makeAppointment = !makeAppointment;
+    }
+    async Task DataInit()
+    {
+        // 1. Инициализируем все необходимые переменные
+        listOfProducts = new();
+        listOfShoppingCart = new();
+        totalPrice = 0;
+
+        // 2. Получаем и сохраняем все ID товаров в локальную переменную
+        listOfShoppingCart = await _protectedLocalStorage.GetFromSession<List<int>>(SD.SessionKey);
+
+        // 3. По полученным ID заполнить (получить) все продукты и сохранить их в переменную
+        if (listOfShoppingCart is not null && listOfShoppingCart.Any())
+        {
+            for (int i = 0; i < listOfShoppingCart.Count; i++)
+            {
+                var currentProduct = await _db.GetSingleProductAsync(listOfShoppingCart[i]);
+                if (listOfProducts.Exists(x => x.Id.Equals(currentProduct.Id)))
+                    listOfProducts.FirstOrDefault(x => x.Id == currentProduct.Id).Quantity++;
+                else
+                {
+                    currentProduct.Quantity = 1;
+                    listOfProducts.Add(currentProduct);
+                }
+
+            }
+            // 4. Получить конечную сумму всех продуктов и сохранить значение в переменную
+            if (listOfProducts is not null && listOfProducts.Any())
+            {
+                listOfProducts.ForEach(x =>
+                {
+                    totalPrice+= x.Price * x.Quantity;
+                });
+            }
+        }
+
+        // 5. Дать команду Blazor перерисовать компонент
+        StateHasChanged();
+    }
+
+}

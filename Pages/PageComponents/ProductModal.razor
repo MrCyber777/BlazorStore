@@ -1,0 +1,202 @@
+﻿@using BlazorInputFile
+@if (displayConfirmation)
+{
+    <div class="modal-backdrop show"></div>
+    <div class="modal" tabindex="-1" style="display:block;">
+        <EditForm Model="ProductDetails" OnValidSubmit="onValidSubmit">
+
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title  text-info">@actionStatus @ProductDetails.Name</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="OnCancel">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="row form-group">
+                                    <div class="col-3">Product Name</div>
+                                    <div class="col-5">
+                                        <InputText class="form-control" @bind-Value="ProductDetails.Name" disabled="@readOnly" />
+                                        <ValidationMessage For="(() => ProductDetails.Name)" />
+                                    </div>
+                                </div>
+
+                                <div class="row form-group">
+                                    <div class="col-3">Category Name</div>
+                                    <div class="col-5">
+                                        @if (actionStatus.Equals(ModalStateEnum.Create) || actionStatus.Equals(ModalStateEnum.Update))
+                                        {
+                                            <select @onchange="@((args) => OnSelectionCategoryChanged.InvokeAsync(args))" class="form-control">
+                                                @if (ProductDetails.Id.Equals(0))
+                                                {
+                                                    <option value="">Select category</option>
+                                                }
+                                                @foreach (var item in Categories)
+                                                {
+                                                    <option value="@item.Id" selected="@((item.Id == ProductDetails.CategoryId) ? true : false)">@item.Name</option>
+                                                }
+                                            </select>
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="form-control" @bind-value="ProductDetails.Category.Name" readonly />
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="row form-group">
+                                    <div class="col-3">Special Tag</div>
+                                    <div class="col-5">
+                                        @if (actionStatus.Equals(ModalStateEnum.Create) || actionStatus.Equals(ModalStateEnum.Update))
+                                        {
+
+                                            <select @onchange="@((args) => OnSelectionSpecialTagsChanged.InvokeAsync(args))" class="form-control">
+                                                @if (ProductDetails.Id.Equals(0))
+                                                {
+                                                    <option value="">Select Special Tag</option>
+                                                }
+                                                @foreach (var item in SpecialTags)
+                                                {
+                                                    <option value="@item.Id" selected="@((item.Id == ProductDetails.SpecialTagId) ? true : false)">@item.Name</option>
+                                                }
+                                            </select>
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="form-control" @bind-value="ProductDetails.SpecialTag.Name" readonly />
+                                        }
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col-3">Price</div>
+                                    <div class="col-5">
+                                        <InputNumber class="form-control" @bind-Value="ProductDetails.Price" disabled="@readOnly" />
+                                        <ValidationMessage For="(() => ProductDetails.Price)" />
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col-3">ShadeColor</div>
+                                    <div class="col-5">
+                                        <InputText class="form-control" @bind-Value="ProductDetails.Name" disabled="@readOnly" />
+                                        <ValidationMessage For="(() => ProductDetails.Name)" />
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col-3">Image</div>
+                                    @if (actionStatus.Equals(ModalStateEnum.Create) || actionStatus.Equals(ModalStateEnum.Update))
+                                    {
+                                        <div class="col-5">
+                                            <BlazorInputFile.InputFile OnChange="@((args) => OnHandleSelection.InvokeAsync(args))" />
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <img src="@ImageToDisplayConverter(ProductDetails.Image)" style="width:100%" />
+                            </div>
+                        </div>
+
+                        <!--<div class="row">
+                        <div class="col-4">Product</div>
+                        <div class="col">-->
+                        @* @bind-Value создаёт в автоматическом режиме делегат и событие @onchange, которое невозможно изменить *@
+                        @* @bind создаёт по умолчанию делегат и событие @onchange, который можно изменить на свой, путём указания @bind:event *@
+                        <!--<InputText type="text" class="form-control" @bind-Value="ProductDetails.Name" />
+                                <ValidationMessage For="@(() =>ProductDetails.Name)" />
+                            </div>
+                        </div>-->
+
+                    </div>
+                    <div class="modal-footer">
+                        @if (actionStatus != ModalStateEnum.Read)
+                        {
+                            <button type="button" class="btn @buttonClass" @onclick="()=>OnConfirm.InvokeAsync(ProductDetails)">
+                                @confirmButtonText
+                            </button>
+                        }
+                        else if (actionStatus == ModalStateEnum.Read)
+                        {
+                            <button type="button" class="btn @buttonClass" @onclick="()=>OnAddToCart.InvokeAsync(ProductDetails) ">
+                                @confirmButtonText
+                            </button>
+                        }
+
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="OnCancel">Close</button>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+}
+
+@code {
+    bool displayConfirmation = false;
+    bool readOnly = false;
+    string confirmButtonText = string.Empty;
+    string buttonClass = string.Empty;
+    ModalStateEnum actionStatus;
+
+    [Parameter] public Product ProductDetails { get; set; }
+    [Parameter] public List<Category> Categories { get; set; }
+    [Parameter] public List<SpecialTag> SpecialTags { get; set; }
+
+
+    [Parameter] public EventCallback<IFileListEntry[]> OnHandleSelection { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> OnSelectionCategoryChanged { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> OnSelectionSpecialTagsChanged { get; set; }
+    [Parameter] public EventCallback<Product> OnConfirm { get; set; }
+    //[Parameter] public EventCallback<Product> OnDelete { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback<Product> OnAddToCart { get; set; }
+
+    public void Show(ModalStateEnum _actionStatus)
+    {
+        displayConfirmation = true;
+
+        switch (_actionStatus)
+        {
+            case ModalStateEnum.Create:
+                readOnly = false;
+                confirmButtonText = "Create";
+                buttonClass = "btn-success";
+                actionStatus = _actionStatus;
+                break;
+            case ModalStateEnum.Read:
+                readOnly = true;
+                actionStatus = _actionStatus;
+                break;
+            case ModalStateEnum.Update:
+                readOnly = false;
+                confirmButtonText = "Update";
+                buttonClass = "btn-primary";
+                actionStatus = _actionStatus;
+                break;
+            case ModalStateEnum.Delete:
+                readOnly = true;
+                confirmButtonText = "Delete";
+                buttonClass = "btn-danger";
+                actionStatus = _actionStatus;
+                break;
+        }
+    }
+    public void Hide() => displayConfirmation = false;
+
+    void onValidSubmit()
+    {
+        OnConfirm.InvokeAsync(ProductDetails);
+    }
+    string ImageToDisplayConverter(byte[] image)// Метод преобразования массива байтов обратно в картинку
+    {
+        if (image is null)
+            return "";
+        var base64 = Convert.ToBase64String(image);
+        var finalString = string.Format("data:image/jpg;base64,{0}", base64);
+
+        return finalString;
+    }
+}

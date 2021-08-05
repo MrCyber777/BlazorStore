@@ -1,4 +1,6 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage _protectedCart
+<div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">Blazor Store</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
@@ -38,12 +40,30 @@
             </NavLink>
         </li>
     </ul>
+    <div class="px-3 text-center">
+        <NavLink class="nav-link" href="shoppingcart">
+            <span class="oi oi-cart cart-icon" aria-hidden="true"></span>
+            <label class="cart">@productCount</label>
+        </NavLink>
+    </div>
 </div>
 
 @code {
+    int productCount = 0;
+    List<int> shoppingCartList;
     private bool collapseNavMenu = true;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            shoppingCartList = await _protectedCart.GetFromSession<List<int>>(SD.SessionKey);
+            productCount = shoppingCartList is not null && shoppingCartList.Any() ? shoppingCartList.Count : 0;
+            StateHasChanged();
+        }
+
+    }
 
     private void ToggleNavMenu()
     {

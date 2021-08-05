@@ -1,0 +1,47 @@
+﻿@page "/details/{ProductId:int}"
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProductService _db
+@inject ProtectedLocalStorage _protectedLocalStorage
+@if(currentProduct is null)
+            {
+                <div class="row">
+                    <div class="col text-center">
+                        <img src="https://media4.giphy.com/media/3oEjI6SIIHBdRxXI40/200w.gif?cid=82a1493bg0nn71x3sx1kequ828lbtngocikpzj86t8xmhc10&rid=200w.gif&ct=g" height="200"/>
+                    </div>
+                </div>
+            }
+else
+            {
+              <DetailsComponent OnAddToCart="AddToCart" productObj="currentProduct"/>
+            }
+@code {
+    [Parameter] public int ProductId { get; set; }
+
+    Product currentProduct;
+    List<int> listOfShoppingCart = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentProduct = await _db.GetSingleProductAsync(ProductId);
+    }
+    async Task AddToCart()//ProtectedLocalStorage - переводит данные в хеш формат запоминая контрольную сумму.
+    {
+        // 1. Получаем все данные из сессии и заносим в локальную переменную типа List<int> listOfShoppingCart
+        List<int> listOfShoppingCart = await _protectedLocalStorage.GetFromSession<List<int>>(SD.SessionKey);
+
+        // 2. Проверить на null и, если получили null, то создать новый экземпляр List<int> listOfShoppingCart
+        if (listOfShoppingCart is null)
+            listOfShoppingCart = new List<int>();
+
+        // 3. Внести (добавить) новые данные в listOfShoppingCart
+        listOfShoppingCart.Add(ProductId);
+
+        // 4. Записать listOfShoppingCart в сессию пользователя (методом расширения)
+        await _protectedLocalStorage.SetForSession(SD.SessionKey, listOfShoppingCart);
+
+        // 5. Оповестить Blazor о обновлении данных явно
+        StateHasChanged();
+    }
+
+
+}

@@ -51,3 +51,18 @@ a, .btn-link {
 .modal {
     background-color: #000000a6;
 }
+.cart-icon
+{
+   font-size:50px !important; 
+   color: #ffffff;
+   text-decoration:none;
+}
+.cart
+{
+ background-color:#28b700;
+ border-radius:20px;
+ padding:0px 8px;
+ color:#ffffff;
+ font-weight:bold;
+ border:1px solid #fff;
+}

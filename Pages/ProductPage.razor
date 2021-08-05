@@ -1,7 +1,14 @@
 ﻿@page "/product"
-@inject ProductService _db
+
 @using BlazorInputFile
 @using System.IO
+@using BlazorStore.Utility
+@using BlazorStore.Extensions
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+
+@inject ProductService _db
+@inject ProtectedLocalStorage _protectedLocalStorage
+
 
 
 <div class="container-fluid p-4">
@@ -48,7 +55,7 @@
                             <td>@item.ShadeColor</td>
                             <td>
                                 <div class="btn-group">
-                                    <button class="btn btn-primary" type="button" @onclick="(()=>DetailsProductHandler(item))"> <i class="fas fa-info"></i></button>
+                                    <button class="btn btn-info" type="button" @onclick="(()=>DetailsProductHandler(item))"> <i class="fas fa-info"></i></button>
                                     <button class="btn btn-primary" type="button" @onclick="(()=>EditProductHandler(item))"><i class="far fa-edit"></i></button>
                                     <button class="btn btn-danger" type="button" @onclick="(()=>DeleteProductHandler(item))"><i class="fas fa-trash"></i></button>
 
@@ -83,20 +90,27 @@
     }
 </div>
 
-@if (showModal)
-{
 
 
-@*if (isDetails)
+<ProductModal @ref="modal" ProductDetails="productObj" OnCancel="CloseModal" OnConfirm="ValidSubmitHandler" OnHandleSelection="HandleSelection" OnSelectionCategoryChanged="SelectionCategoryChanged" OnSelectionSpecialTagsChanged="SelectionSpecialTagsChanged" Categories="categories" SpecialTags="specialTags" />
+
+@*if (showModal)
     {
-        <DetailsModalProduct productObj="productObj" OnCloseModal="CloseModal" />
+
+
+    if (isDetails)
+        {
+            <DetailsModalProduct productObj="productObj" OnCloseModal="CloseModal" />
+        }
+        else
+        {
+            <AddEditDetailsModalProduct productObj="productObj" OnCloseModal="CloseModal" OnValidSubmitHandler="ValidSubmitHandler" Categories="categories" SpecialTags="specialTags" OnSelectionCategoryChanged="SelectionCategoryChanged" OnSelectionSpecialTagsChanged="SelectionSpecialTagsChanged" OnHandleSelection="HandleSelection" />
+        }
+
+     <AddEditDetailsModalProduct  ModalState="modalState"  productObj = "productObj" OnCloseModal = "CloseModal" OnValidSubmitHandler = "ValidSubmitHandler" Categories = "categories" SpecialTags = "specialTags" OnSelectionCategoryChanged = "SelectionCategoryChanged" OnSelectionSpecialTagsChanged = "SelectionSpecialTagsChanged" OnHandleSelection = "HandleSelection" />
+
     }
-    else
-    {
-        <AddEditDetailsModalProduct productObj="productObj" OnCloseModal="CloseModal" OnValidSubmitHandler="ValidSubmitHandler" Categories="categories" SpecialTags="specialTags" OnSelectionCategoryChanged="SelectionCategoryChanged" OnSelectionSpecialTagsChanged="SelectionSpecialTagsChanged" OnHandleSelection="HandleSelection" />
-    }*@
-    <AddEditDetailsModalProduct  ModalState="modalState"  productObj = "productObj" OnCloseModal = "CloseModal" OnValidSubmitHandler = "ValidSubmitHandler" Categories = "categories" SpecialTags = "specialTags" OnSelectionCategoryChanged = "SelectionCategoryChanged" OnSelectionSpecialTagsChanged = "SelectionSpecialTagsChanged" OnHandleSelection = "HandleSelection" />
-}
+*@
 
 
 
@@ -110,25 +124,28 @@
     public byte[] ImageUploaded { get; set; }
     //bool isDetails = false;
     ModalStateEnum modalState = new();
+    ProductModal modal;
 
     protected override async Task OnInitializedAsync()
     {
         products = await _db.GetAllProductsAsync();
         specialTags = await _db.GetAllSpecialTagsAsync();
         categories = await _db.GetAllCategoriesAsync();
-        modalState = ModalStateEnum.None;
+        //modalState = ModalStateEnum.None;
     }
     void AddNewProduct()
     {
         productObj = new();
         productObj.Id = 0;
         modalState = ModalStateEnum.Create;
-        showModal = true;
+        modal.Show(modalState);
+        //showModal = true;
     }
     void CloseModal()
     {
-        showModal = false;
-        modalState = ModalStateEnum.None;
+        modal.Hide();
+        //showModal = false;
+        //modalState = ModalStateEnum.None;
         //isDetails = false;
     }
     async Task HandleSelection(IFileListEntry[] files)//  Асинхронный метод, который обрабатывает файлы загруженные через форму
@@ -151,44 +168,48 @@
 
         return finalString;
     }
-    async Task ValidSubmitHandler()
+    async Task ValidSubmitHandler(Product _prodDetails)
     {
         bool result = false;
-        showModal = false;
+        //showModal = false;
+        modal.Hide();
 
         if (modalState.Equals(ModalStateEnum.Create))
         {
-            result = await _db.CreateProductAsync(productObj);
+            result = await _db.CreateProductAsync(_prodDetails);
         }
-        else if (modalState.Equals(ModalStateEnum.Edit))
+        else if (modalState.Equals(ModalStateEnum.Update))
         {
-            result = await _db.UpdateProductAsync(productObj);
+            result = await _db.UpdateProductAsync(_prodDetails);
         }
         else if (modalState.Equals(ModalStateEnum.Delete))
         {
-            result = await _db.DeleteProductAsync(productObj);
+            result = await _db.DeleteProductAsync(_prodDetails);
             products.Clear();
         }
-        
+
         products = await _db.GetAllProductsAsync();
     }
     void EditProductHandler(Product productForEdit)
     {
         productObj = productForEdit;
-        modalState = ModalStateEnum.Edit;
-        showModal = true;
+        modalState = ModalStateEnum.Update;
+        modal.Show(modalState);
+        //showModal = true;
     }
     void DeleteProductHandler(Product productForDeletion)
     {
         productObj = productForDeletion;
         modalState = ModalStateEnum.Delete;
-        showModal = true;
+        modal.Show(modalState);
+        //showModal = true;
     }
     void DetailsProductHandler(Product productDetails)
     {
         productObj = productDetails;
-        modalState = ModalStateEnum.Details;
-        showModal = true;
+        modalState = ModalStateEnum.Read;
+        modal.Show(modalState);
+        //showModal = true;
     }
     void SelectionCategoryChanged(ChangeEventArgs args)
     {
@@ -204,6 +225,25 @@
             productObj.SpecialTagId = id;
         }
     }
+    async Task AddToCart()//ProtectedLocalStorage - переводит данные в хеш формат запоминая контрольную сумму.
+    {
+        // 1. Получаем все данные из сессии и заносим в локальную переменную типа List<int> listOfShoppingCart
+        List<int> listOfShoppingCart = await _protectedLocalStorage.GetFromSession<List<int>>(SD.SessionKey);
+
+        // 2. Проверить на null и, если получили null, то создать новый экземпляр List<int> listOfShoppingCart
+        if (listOfShoppingCart is null)
+            listOfShoppingCart = new List<int>();
+
+        // 3. Внести (добавить) новые данные в listOfShoppingCart
+        listOfShoppingCart.Add(productObj.Id);
+
+        // 4. Записать listOfShoppingCart в сессию пользователя (методом расширения)
+        await _protectedLocalStorage.SetForSession(SD.SessionKey, listOfShoppingCart);
+
+        // 5. Оповестить Blazor о обновлении данных явно
+        StateHasChanged();
+    }
+
 
 }
 

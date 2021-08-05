@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 namespace BlazorStore.Data.Models
 {
     public enum ModalStateEnum
-    {
-        None,
+    {       
         Create,
-        Edit,
-        Delete,
-        Details
+        Read,
+        Update,
+        Delete
     }
 }

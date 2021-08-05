@@ -1,0 +1,67 @@
+﻿@using System.IO
+@using BlazorInputFile
+
+
+<div class="row">
+    <div class="col-8">
+        <div class="row form-group">
+            <div class="col-3">Product Name</div>
+            <div class="col-9">
+                <input type="text" class="form-control" readonly @bind="productObj.Name" />
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-3">Category Name</div>
+            <div class="col-9">
+                <input type="text" class="form-control" readonly @bind="productObj.Category.Name" />
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-3">Special Tag Name</div>
+            <div class="col-9">
+                <input type="text" class="form-control" readonly @bind="productObj.SpecialTag.Name" />
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-3">Price</div>
+            <div class="col-9">
+                <input type="text" class="form-control" readonly @bind="productObj.Price" />
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-3">ShadeColor</div>
+            <div class="col-9">
+                <input type="text" class="form-control" readonly @bind="productObj.ShadeColor" />
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col">
+                <NavLink class="btn btn-success form-control" href="">Back To List</NavLink>
+            </div>
+            <div class="col">
+                <button  class="btn btn-primary form-control" @onclick="OnAddToCart">Add To Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-4">
+        <img src="@ImageToDisplayConverter(productObj.Image)" style="width:100%" />
+    </div>
+</div>
+            
+@code {
+    [Parameter] public Product productObj { get; set; }
+    [Parameter] public EventCallback OnAddToCart { get; set; }
+
+
+    string ImageToDisplayConverter(byte[] image)// Метод преобразования массива байтов обратно в картинку
+    {
+        if (image is null)
+            return "";
+        var base64 = Convert.ToBase64String(image);
+        var finalString = string.Format("data:image/jpg;base64,{0}", base64);
+
+        return finalString;
+    }
+
+}

@@ -1,7 +1,65 @@
 ﻿@page "/"
+@inject ProductService _db
+<div class="row p-4 border rounded">
+    @if (listOfProducts is null)
+    {
+        <div class="row">
+            <div class="col text-center">
+                <img src="https://media4.giphy.com/media/3oEjI6SIIHBdRxXI40/200w.gif?cid=82a1493bg0nn71x3sx1kequ828lbtngocikpzj86t8xmhc10&rid=200w.gif&ct=g" height="200" />
+            </div>
+        </div>
+    }
+    else if (listOfProducts.Any())
+    {
 
-<h1>Hello, world!</h1>
+        @foreach (var item in listOfProducts)
+        {
+            <div class=" col col-sm-12 col-md-6 col-lg-3">
+                <div class="card mr-3 mb-3">
+                    <img src="@ImageToDisplayConverter(item.Image)" class="card-img-top" height="200" width="200" alt="@item.Name picture">
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Name</h5>                       
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-7 text-left">
+                                <span class="text-primary">
+                                    @string.Format("{0:C}", item.Price)
+                                </span>
+                            </div>
+                            <div class="col-5 text-right">
+                                <a class="btn btn-success" href="/details/@item.Id">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="row">
+            <div class="col text-center">
+                <img src="https://image.flaticon.com/icons/png/128/2748/2748558.png" height="200" />
+            </div>
+        </div>
+    }
+</div>
 
-Welcome to your new app.
+@code
+{
+    List<Product> listOfProducts;
+    protected override async Task OnInitializedAsync()
+    {
+        listOfProducts = await _db.GetAllProductsAsync();
+    }
+    string ImageToDisplayConverter(byte[] image)// Метод преобразования массива байтов обратно в картинку
+    {
+        if (image is null)
+            return "";
+        var base64 = Convert.ToBase64String(image);
+        var finalString = string.Format("data:image/jpg;base64,{0}", base64);
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+        return finalString;
+    }
+}
