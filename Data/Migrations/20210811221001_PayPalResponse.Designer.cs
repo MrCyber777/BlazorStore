@@ -4,14 +4,16 @@ using BlazorStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BlazorStore.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210811221001_PayPalResponse")]
+    partial class PayPalResponse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -143,6 +145,68 @@ namespace BlazorStore.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("BlazorStore.Data.Models.PayPalResponse", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AppointmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("BusinessEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Currency")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Custom")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("GrossTotal")
+                        .HasColumnType("float");
+
+                    b.Property<int>("InvoiceNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ItemName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PayerEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PayerFirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PayerLastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("PaymentFee")
+                        .HasColumnType("float");
+
+                    b.Property<string>("PaymentStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReceiverEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SubscriberId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TxToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId");
+
+                    b.ToTable("PayPalResponses");
                 });
 
             modelBuilder.Entity("BlazorStore.Data.Models.Product", b =>
@@ -463,6 +527,17 @@ namespace BlazorStore.Data.Migrations
                     b.Navigation("Appointment");
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("BlazorStore.Data.Models.PayPalResponse", b =>
+                {
+                    b.HasOne("BlazorStore.Data.Models.Appointment", "Appointment")
+                        .WithMany()
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Appointment");
                 });
 
             modelBuilder.Entity("BlazorStore.Data.Models.Product", b =>

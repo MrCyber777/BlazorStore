@@ -13,6 +13,8 @@ namespace BlazorStore.Data
         public DbSet<SpecialTag> SpecialTags { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Appointment>Appointments { get; set; }
-        public DbSet<ApplicationUser>ApplicationUsers { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<OrderModel> Orders { get; set; }
+        public DbSet<OrderDetails> OrderDetails { get; set; }     
     }
 }

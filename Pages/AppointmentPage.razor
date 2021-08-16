@@ -102,14 +102,14 @@
         int result =0;
         showModal = false;
 
-        if (appointmentObj.Id.Equals(0))
-        {
-            result = await _db.CreateAppointmentAsync(appointmentObj);
-        }
-        else
-        {
-            result = await _db.UpdateAppointmentAsync(appointmentObj);
-        }
+        //if (appointmentObj.Id.Equals(0))
+        //{
+        //    result = await _db.CreateAppointmentAsync(appointmentObj);
+        //}
+        //else
+        //{
+        result = await _db.UpdateAppointmentAsync(appointmentObj);
+        //}
         appointments = await _db.GetAllAppointmentsAsync();
 
     }

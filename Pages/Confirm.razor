@@ -1,0 +1,229 @@
+﻿
+@page "/confirm/{AppointmentId}"
+@using Microsoft.AspNetCore.Http;
+@inject AppointmentService _db
+@inject ProductService _productDB
+@inject ProtectedLocalStorage _protectedLocalStorage
+
+@if (currentAppointment is not null)
+{
+    <div class="my-4 p-4 row">
+        <div class="row">
+            <div class="col">
+                <h1 class="text-info">Appointment Confirmation</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 col-md-3 pb-3">
+                <div class="border border-info">
+                    <div class="text-center">
+                        <span class="oi oi-person my-3" style="font-size: 200px"></span>
+                    </div>
+                    <hr />
+                    <div>
+                        <h3 class="text-center">@currentAppointment.CustomerName</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-12  col-md-3">
+                <div class="border border-info">
+                    <div class="text-center">
+                        <span class="oi oi-envelope-open my-3" style="font-size: 200px"></span>
+                    </div>
+                    <hr />
+                    <div>
+                        <h3 class="text-center">@currentAppointment.CustomerSurname</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-12 col-md-3 pb-3">
+                <div class="border border-info">
+                    <div class="text-center">
+                        <span class="oi oi-phone my-3" style="font-size: 200px"></span>
+                    </div>
+                    <hr />
+                    <div>
+                        <h3 class="text-center">@currentAppointment.CustomerPhoneNumber</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3 pb-3">
+                <div class="border border-info">
+                    <div class="text-center">
+                        <span class="oi oi-calendar my-3" style="font-size: 200px"></span>
+                    </div>
+                    <hr />
+                    <div>
+                        <h3 class="text-center">@currentAppointment.AppointmentDay</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3 pb-3">
+                <div class="border border-info">
+                    <div class="text-center">
+                        <span class="oi oi-home my-3" style="font-size: 200px"></span>
+                    </div>
+                    <hr />
+                    <div>
+                        <h3 class="text-center">@currentAppointment.Address</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-12 col-md-3 pb-3">
+                <div class="border border-info">
+                    <div class="text-center">
+                        <span class="oi oi-target my-3" style="font-size: 200px"></span>
+                    </div>
+                    <hr />
+                    <div>
+                        <h3 class="text-center">@currentAppointment.Country</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3 pb-3">
+                <div class="border border-info">
+                    <div class="text-center">
+                        <span class="oi oi-basket my-3" style="font-size: 200px"></span>
+                    </div>
+                    <hr />
+                    <div>
+                        <h3 class="text-center">@currentAppointment.City</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3 pb-3">
+                <div class="border border-info">
+                    <div class="text-center">
+                        <span class="oi oi-envelope-closed my-3" style="font-size: 200px"></span>
+                    </div>
+                    <hr />
+                    <div>
+                        <h3 class="text-center">@currentAppointment.CustomerEmail</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3 pb-3">
+                <div class="border border-info">
+                    <div class="text-center">
+                        <span class="oi oi-calculator my-3" style="font-size: 200px"></span>
+                    </div>
+                    <hr />
+                    <div>
+                        <h3 class="text-center">@currentAppointment.Zip</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12  col-md-6 offset-3">
+            <button class="btn btn-success form-control" type="submit">Pay</button>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col">
+            <img class="text-center" src="data:image/jpeg;base64,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" height="200" />
+        </div>
+    </div>
+}
+@*
+    TODO Внедрить скрытую форму  PayPal. Внедрить все настройки PayPal. Кнопка Pay должна принадлежать скрытой форме Paypal. Сформировать товары для этой формы.
+*@
+
+     <form method="post" action="@paypal.PostUrl">
+        <input type="hidden" name="cmd" value="_cart" />
+        <input type="hidden" name="upload" value="1" />
+        <input type="hidden" name="business" value="@paypal.Business" />
+        <input type="hidden" name="currency_code" value="USD" />
+        @foreach (var item in listOfProducts)
+        {
+            <input type="hidden" name="item_name_@count" value="@item.Name" />
+            <input type="hidden" name="amount_@count" value="@item.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+            <input type="hidden" name="quantity_@count" value="@item.Quantity" />
+            count++;
+
+        }
+        <div class=" row form-group">
+            <div class="col-2">
+                <input type="submit" value="Pay" class="btn btn-primary form-control" />
+            </div>
+        </div>
+
+    </form>
+
+
+
+
+@code
+{
+    [Parameter] public Appointment Appointment { get; set; }
+    [Parameter] public string AppointmentId { get; set; }
+    Appointment currentAppointment = new Appointment();
+    int appointmentId;
+    List<Product> listOfProducts;
+    List<int> listOfShoppingCart;
+    int count = 1;
+    double totalPrice;
+    PayPalConfig paypal;
+    PayPalResponse payPalResponse;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //appointmentId=Convert.ToInt32(AppointmentId.FromBase64());
+        currentAppointment = new Appointment();
+        string stringId = AppointmentId.FromBase64();
+        appointmentId = Convert.ToInt32(stringId);
+        paypal = PayPal.GetPayPalConfig();
+        
+
+        currentAppointment = await _db.GetSingleAppointmentAsync(appointmentId);
+    }
+    async Task DataInit()
+    {
+        // 1. Инициализируем все необходимые переменные
+        listOfProducts = new();
+        listOfShoppingCart = new();
+        totalPrice = 0;
+
+        // 2. Получаем и сохраняем все ID товаров в локальную переменную
+        listOfShoppingCart = await _protectedLocalStorage.GetFromSession<List<int>>(SD.SessionKey);
+
+        // 3. По полученным ID заполнить (получить) все продукты и сохранить их в переменную
+        if (listOfShoppingCart is not null && listOfShoppingCart.Any())
+        {
+            for (int i = 0; i < listOfShoppingCart.Count; i++)
+            {
+                var currentProduct = await _productDB.GetSingleProductAsync(listOfShoppingCart[i]);
+                if (listOfProducts.Exists(x => x.Id.Equals(currentProduct.Id)))
+                    listOfProducts.FirstOrDefault(x => x.Id == currentProduct.Id).Quantity++;
+                else
+                {
+                    currentProduct.Quantity = 1;
+                    listOfProducts.Add(currentProduct);
+                }
+
+            }
+            // 4. Получить конечную сумму всех продуктов и сохранить значение в переменную
+            if (listOfProducts is not null && listOfProducts.Any())
+            {
+                listOfProducts.ForEach(x =>
+                {
+                    totalPrice += x.Price * x.Quantity;
+                });
+            }
+        }
+
+        // 5. Дать команду Blazor перерисовать компонент
+        StateHasChanged();
+    }
+    async Task Success()
+    {
+       
+    }
+}

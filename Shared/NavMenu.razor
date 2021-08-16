@@ -56,12 +56,11 @@
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
+       
             shoppingCartList = await _protectedCart.GetFromSession<List<int>>(SD.SessionKey);
             productCount = shoppingCartList is not null && shoppingCartList.Any() ? shoppingCartList.Count : 0;
             StateHasChanged();
-        }
+     
 
     }
 
