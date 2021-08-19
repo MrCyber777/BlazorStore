@@ -5,9 +5,15 @@
 @using BlazorStore.Utility
 @using BlazorStore.Extensions
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using System.Text
+
+
 
 @inject ProductService _db
 @inject ProtectedLocalStorage _protectedLocalStorage
+
+
+
 
 
 
@@ -91,8 +97,8 @@
 </div>
 
 
-
 <ProductModal @ref="modal" ProductDetails="productObj" OnCancel="CloseModal" OnConfirm="ValidSubmitHandler" OnHandleSelection="HandleSelection" OnSelectionCategoryChanged="SelectionCategoryChanged" OnSelectionSpecialTagsChanged="SelectionSpecialTagsChanged" Categories="categories" SpecialTags="specialTags" />
+
 
 @*if (showModal)
     {
@@ -119,6 +125,7 @@
     List<Product> products;
     List<SpecialTag> specialTags;
     List<Category> categories;
+    
     Product productObj = new();
     bool showModal = false;
     public byte[] ImageUploaded { get; set; }
@@ -133,6 +140,7 @@
         categories = await _db.GetAllCategoriesAsync();
         //modalState = ModalStateEnum.None;
     }
+
     void AddNewProduct()
     {
         productObj = new();
@@ -141,6 +149,7 @@
         modal.Show(modalState);
         //showModal = true;
     }
+   
     void CloseModal()
     {
         modal.Hide();

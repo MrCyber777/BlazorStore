@@ -38,7 +38,7 @@ namespace BlazorStore.Data.Models
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             authToken = payPalConfig.AuthToken;
             txToken = tx;// Присваеваем данные сформированные с формы
-            query = string.Format($"cmd=_notify-cynch&tx={txToken}&at={authToken}");//формируем запрос 
+            query = string.Format($"cmd=_notify-synch&tx={txToken}&at={authToken}");//формируем запрос 
             string url = payPalConfig.PostUrl;
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);// Создаем запрос к серверу Paypal

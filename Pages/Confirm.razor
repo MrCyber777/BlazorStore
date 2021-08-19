@@ -1,9 +1,9 @@
 ﻿
 @page "/confirm/{AppointmentId}"
-@using Microsoft.AspNetCore.Http;
 @inject AppointmentService _db
 @inject ProductService _productDB
 @inject ProtectedLocalStorage _protectedLocalStorage
+
 
 @if (currentAppointment is not null)
 {
@@ -118,11 +118,7 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-sm-12  col-md-6 offset-3">
-            <button class="btn btn-success form-control" type="submit">Pay</button>
-        </div>
-    </div>
+  
 }
 else
 {
@@ -135,7 +131,8 @@ else
 @*
     TODO Внедрить скрытую форму  PayPal. Внедрить все настройки PayPal. Кнопка Pay должна принадлежать скрытой форме Paypal. Сформировать товары для этой формы.
 *@
-
+ @if (listOfProducts is not null)
+ {
      <form method="post" action="@paypal.PostUrl">
         <input type="hidden" name="cmd" value="_cart" />
         <input type="hidden" name="upload" value="1" />
@@ -149,13 +146,14 @@ else
             count++;
 
         }
-        <div class=" row form-group">
-            <div class="col-2">
+        <div class="row">
+            <div class="col-sm-12  col-md-6 offset-3">
                 <input type="submit" value="Pay" class="btn btn-primary form-control" />
             </div>
         </div>
 
     </form>
+ }
 
 
 
@@ -171,7 +169,6 @@ else
     int count = 1;
     double totalPrice;
     PayPalConfig paypal;
-    PayPalResponse payPalResponse;
 
     protected override async Task OnInitializedAsync()
     {
@@ -180,10 +177,13 @@ else
         string stringId = AppointmentId.FromBase64();
         appointmentId = Convert.ToInt32(stringId);
         paypal = PayPal.GetPayPalConfig();
-        
+
+        await DataInit();
 
         currentAppointment = await _db.GetSingleAppointmentAsync(appointmentId);
     }
+   
+
     async Task DataInit()
     {
         // 1. Инициализируем все необходимые переменные
@@ -222,8 +222,5 @@ else
         // 5. Дать команду Blazor перерисовать компонент
         StateHasChanged();
     }
-    async Task Success()
-    {
-       
-    }
+
 }

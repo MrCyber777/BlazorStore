@@ -3,7 +3,8 @@
 
 <div class=" my-4 p-4 row">
     <EditForm Model="Appointment" OnValidSubmit="ValidSubmit">
-
+        <DataAnnotationsValidator />
+        <ValidationSummary />
         <div class="row">
             <div class="col-sm-12  col-md-3 pb-3">
                 <div class="form-group">
@@ -76,17 +77,17 @@
 
         </div>
         <div class="row">
-        <div class="col-sm-12  col-md-5">
-            <div class="form-group">
-                <button class="btn btn-danger form-control" @onclick="OnClose" type="button">Close</button>
+            <div class="col-sm-12  col-md-5">
+                <div class="form-group">
+                    <button class="btn btn-danger form-control" @onclick="OnClose" type="button">Close</button>
+                </div>
+            </div>
+            <div class="col-sm-12  col-md-5">
+                <div class="form-group">
+                    <button class="btn btn-success form-control" type="submit">Make Appointment</button>
+                </div>
             </div>
         </div>
-        <div class="col-sm-12  col-md-5">
-            <div class="form-group">
-                <button class="btn btn-success form-control" type="submit">Make Appointment</button>
-            </div>
-        </div>
-       </div>
     </EditForm>
 </div>
 
