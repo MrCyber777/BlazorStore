@@ -32,6 +32,7 @@ namespace BlazorStore.Data.Services
         {
             if (newAppointment == null)
                 return 0;
+
             await _db.Appointments.AddAsync(newAppointment);
             await _db.SaveChangesAsync();
 
@@ -40,8 +41,7 @@ namespace BlazorStore.Data.Services
             var claimsIdentity = (ClaimsIdentity)_httpContextAccessor.HttpContext.User.Identity;// Получаем информацию о пользователе (Identity)
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);// Получаем свойство NameIdentifier ( id ) 
             var userId = claim?.Value;
-
-            int orderId = 0;
+ 
             OrderModel order = new();
             order.AppointmentId = newAppointment.Id;
             order.UserId = userId;
@@ -49,17 +49,17 @@ namespace BlazorStore.Data.Services
             await _db.Orders.AddAsync(order);
             await _db.SaveChangesAsync();
 
-            orderId = order.OrderId;
-
-            OrderDetails details = new();
             foreach(var item in listOfProducts)
             {
-                details.OrderId = orderId;
+                OrderDetails details = new();
+                details.OrderId = order.OrderId;
                 details.UserId = userId;
                 details.ProductId = item.Id;
                 details.Quantity = item.Quantity;
-                await _db.OrderDetails.AddAsync(details);
+
+                order.OrderDetails.Add(details);
             }
+            _db.Orders.Update(order);
             await _db.SaveChangesAsync();
 
             return newAppointment.Id;

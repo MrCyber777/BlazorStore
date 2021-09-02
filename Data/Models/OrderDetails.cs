@@ -13,11 +13,11 @@ namespace BlazorStore.Data.Models
         public string UserId { get; set; }
         public int ProductId { get; set; }
         public int Quantity { get; set; }
-        [ForeignKey(nameof(OrderId))]
-        public virtual OrderModel Orders { get; set; }
+        
         [ForeignKey(nameof(ProductId))]
         public virtual Product Products { get; set; }
         [ForeignKey(nameof(UserId))]
         public virtual ApplicationUser User { get; set; }
+        public List<OrderModel> Orders { get; set; } = new();
     }
 }

@@ -3,7 +3,7 @@
 {
     <div class="modal-backdrop show"></div>
     <div class="modal" tabindex="-1" style="display:block;">
-        <EditForm Model="ProductDetails" OnValidSubmit="onValidSubmit">
+        <EditForm Model="ProductDetails" OnValidSubmit="OnValidSubmit">
 
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
@@ -86,30 +86,42 @@
                                         <ValidationMessage For="(() => ProductDetails.Name)" />
                                     </div>
                                 </div>
+                              
                                 <div class="row form-group">
                                     <div class="col-3">Image</div>
                                     @if (actionStatus.Equals(ModalStateEnum.Create) || actionStatus.Equals(ModalStateEnum.Update))
                                     {
-                                        <div class="col-5">
-                                            <BlazorInputFile.InputFile OnChange="@((args) => OnHandleSelection.InvokeAsync(args))" />
-                                        </div>
+                                       
+                                            <div class="col-5">
+                                                <BlazorInputFile.InputFile OnChange="@((args) => OnHandleSelection.InvokeAsync(args))" />
+                                            </div>                                    
                                     }
                                 </div>
+                                
                             </div>
-                            <div class="col-4">
-                                <img src="@ImageToDisplayConverter(ProductDetails.Image)" style="width:100%" />
-                            </div>
+                            @if (ProductDetails.Image is not null)
+                            {
+                                <div class="col-4">
+                                    <img src="@ImageToDisplayConverter(ProductDetails.Image)" style="width:100%" />
+                                </div>
+                            }
+                            else
+                            {
+                                <img src="https://st4.depositphotos.com/1028437/21297/v/600/depositphotos_212975764-stock-illustration-image-available-sign.jpg" width="100" />
+                            }
+
                         </div>
 
                         <!--<div class="row">
-                        <div class="col-4">Product</div>
-                        <div class="col">-->
+    <div class="col-4">Product</div>
+    <div class="col">-->
                         @* @bind-Value создаёт в автоматическом режиме делегат и событие @onchange, которое невозможно изменить *@
-                        @* @bind создаёт по умолчанию делегат и событие @onchange, который можно изменить на свой, путём указания @bind:event *@
-                        <!--<InputText type="text" class="form-control" @bind-Value="ProductDetails.Name" />
-                                <ValidationMessage For="@(() =>ProductDetails.Name)" />
-                            </div>
-                        </div>-->
+                        @* @bind создаёт по умолчанию делегат и событие @onchange, который можно изменить на свой, путём указания @bind:event
+        <!--<InputText type="text" class="form-control" @bind-Value="ProductDetails.Name" />
+                <ValidationMessage For="@(() =>ProductDetails.Name)" />
+            </div>
+        </div>-->
+                        *@
 
                     </div>
                     <div class="modal-footer">
@@ -186,7 +198,7 @@
     }
     public void Hide() => displayConfirmation = false;
 
-    void onValidSubmit()
+    void OnValidSubmit()
     {
         OnConfirm.InvokeAsync(ProductDetails);
     }

@@ -44,14 +44,15 @@
                         <tbody>
                             @foreach (var item in listOfProducts)
                             {
-                                <tr>
-                                    <td><img class="image-fluid img-thumbnail" src="@ToDisplayExtension.ImageToDisplayConverter(item.Image)" height="100" width="150" /></td>
-                                    <td>@item.Name</td>
-                                    <td>@item.Category.Name</td>
-                                    <td>@item.Quantity</td>
-                                    <td>@string.Format("{0:C}", item.Price)</td>
-                                    <td><button class="btn btn-danger">Remove</button></td>
-                                </tr>
+                            <tr>
+
+                                <td><img class="image-fluid img-thumbnail" src="@ToDisplayExtension.ImageToDisplayConverter(item.Image)" height="100" width="150" /></td>
+                                <td>@item.Name</td>
+                                <td>@item.Category.Name</td>
+                                <td>@item.Quantity</td>
+                                <td>@string.Format("{0:C}", item.Price)</td>
+                                <td><button class="btn btn-danger" @onclick="()=>Remove(item.Id)">Remove</button></td>
+                            </tr>
 
                             }
                         </tbody>
@@ -72,8 +73,10 @@
 
     @if (makeAppointment)
     {
-        <AppointmentComponent Appointment="appointmentObj" Products="listOfProducts"  OnClose="MakeAppointment"/>
+        <AppointmentComponent Appointment="appointmentObj" Products="listOfProducts" OnClose="MakeAppointment" />
     }
+   
+
 </div>
 
    
@@ -82,21 +85,33 @@
 
 @code
 {
-        List<Product> listOfProducts;
-        List<int> listOfShoppingCart;
-        Appointment appointmentObj = new();
-        double totalPrice = 0;
-        bool makeAppointment = false;
+    List<Product> listOfProducts;
+    List<int> listOfShoppingCart;
+    List<Product> products;
+    Appointment appointmentObj = new();
+    Product productObj = new();
+    double totalPrice = 0;
+    bool makeAppointment = false;
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)// Срабатывает после первой отрисовки компонента
     {
         if (firstRender)
             await DataInit();
+
     }
     void MakeAppointment()
     {
         makeAppointment = !makeAppointment;
     }
+    async Task Remove(int id)
+    {
+        listOfShoppingCart.Remove(id);
+        await _protectedLocalStorage.SetForSession(SD.SessionKey,listOfShoppingCart);
+        await DataInit();
+    }
+
+
     async Task DataInit()
     {
         // 1. Инициализируем все необходимые переменные

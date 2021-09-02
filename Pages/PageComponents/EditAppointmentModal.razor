@@ -1,0 +1,117 @@
+﻿@inject AppointmentService _db
+@if (displayEditAppointment)
+{
+    <div class="modal-backdrop show"></div>
+    <div class="modal" tabindex="-1" style="display:block;">
+
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title  text-info">Edit Appointment</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="OnCancel">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @*<DataAnnotationsValidator />*@
+                    @*<ValidationSummary />*@
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="row form-group">
+                                <div class="col-4">Customer Name</div>
+                                <div class="col-8">
+                                    <input class="form-control" @bind="AppointmentDetails.CustomerName" disabled="@readOnly" />
+                                    @*<ValidationMessage For="(() => AppointmentDetails.CustomerName)" />*@
+                                </div>
+                            </div>
+
+                          
+                            <div class="row form-group">
+                                <div class="col-4">Email</div>
+                                <div class="col-8">
+                                    <input class="form-control" @bind="AppointmentDetails.CustomerEmail" disabled="@readOnly" />
+                                    @*<ValidationMessage For="(() =>AppointmentDetails.CustomerEmail)" />*@
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-4">Customer Number</div>
+                                <div class="col-8">
+                                    <input class="form-control" @bind="AppointmentDetails.CustomerPhoneNumber" disabled="@readOnly" />
+                                    @*<ValidationMessage For="(() =>AppointmentDetails.CustomerEmail)" />*@
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="OnCancel">Close</button>
+                        <button type="submit" class="btn btn-primary"@onclick="OnValidSubmitHandler">Save changes</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+@code
+ {
+    bool displayEditAppointment = false;
+    bool readOnly = false;
+    string confirmButtonText = string.Empty;
+    string buttonClass = string.Empty;
+    ModalStateEnum actionStatus;
+    Appointment appointmentObj = new();
+    ModalStateEnum modalState = new();
+    EditAppointmentModal modal;
+
+
+    [Parameter] public Appointment AppointmentDetails { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnValidSubmitHandler { get; set; }
+
+    [Parameter] public EventCallback<Appointment> OnConfirm { get; set; }
+
+    public void Show(ModalStateEnum _actionStatus)
+    {
+        displayEditAppointment = true;
+
+        switch (_actionStatus)
+        {
+            case ModalStateEnum.Update:
+                readOnly = false;
+                actionStatus = _actionStatus;
+                break;
+
+        }
+    }
+    public void Hide() => displayEditAppointment = false;
+
+    void OnValidSubmit()
+    {
+        OnConfirm.InvokeAsync(AppointmentDetails);
+    }
+    //async Task ValidSubmitHandler()
+    //{
+
+    //    bool result = false;
+    //    // 2. Скрываем модальное окно
+    //    modal.Hide();
+
+    //    if (appointmentObj.Id.Equals(0))
+    //    {
+    //        result = await _db.UpdateAppointmentAsync(appointmentObj);
+    //    }
+    //    else
+    //    {
+
+    //    }
+
+    //    // 4. Обновить список всех категорий
+    //    categories = await _db.GetAllCategoriesAsync();
+    //}
+
+
+}

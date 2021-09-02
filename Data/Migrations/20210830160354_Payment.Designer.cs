@@ -4,14 +4,16 @@ using BlazorStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BlazorStore.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210830160354_Payment")]
+    partial class Payment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -65,10 +67,15 @@ namespace BlazorStore.Data.Migrations
                     b.Property<bool>("IsConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("PaymentId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Zip")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PaymentId");
 
                     b.ToTable("Appointments");
                 });
@@ -111,6 +118,8 @@ namespace BlazorStore.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OrderId");
+
                     b.HasIndex("ProductId");
 
                     b.HasIndex("UserId");
@@ -131,17 +140,12 @@ namespace BlazorStore.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("PaymentId")
-                        .HasColumnType("int");
-
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("OrderId");
 
                     b.HasIndex("AppointmentId");
-
-                    b.HasIndex("PaymentId");
 
                     b.HasIndex("UserId");
 
@@ -165,9 +169,6 @@ namespace BlazorStore.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PayerLastName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PaymentStatus")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("TotalPrice")
@@ -440,21 +441,6 @@ namespace BlazorStore.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("OrderDetailsOrderModel", b =>
-                {
-                    b.Property<int>("OrderDetailsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrdersOrderId")
-                        .HasColumnType("int");
-
-                    b.HasKey("OrderDetailsId", "OrdersOrderId");
-
-                    b.HasIndex("OrdersOrderId");
-
-                    b.ToTable("OrderDetailsOrderModel");
-                });
-
             modelBuilder.Entity("BlazorStore.Data.Models.ApplicationUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
@@ -466,8 +452,23 @@ namespace BlazorStore.Data.Migrations
                     b.HasDiscriminator().HasValue("ApplicationUser");
                 });
 
+            modelBuilder.Entity("BlazorStore.Data.Models.Appointment", b =>
+                {
+                    b.HasOne("BlazorStore.Data.Models.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId");
+
+                    b.Navigation("Payment");
+                });
+
             modelBuilder.Entity("BlazorStore.Data.Models.OrderDetails", b =>
                 {
+                    b.HasOne("BlazorStore.Data.Models.OrderModel", "Orders")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BlazorStore.Data.Models.Product", "Products")
                         .WithMany()
                         .HasForeignKey("ProductId")
@@ -477,6 +478,8 @@ namespace BlazorStore.Data.Migrations
                     b.HasOne("BlazorStore.Data.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
+
+                    b.Navigation("Orders");
 
                     b.Navigation("Products");
 
@@ -491,10 +494,6 @@ namespace BlazorStore.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BlazorStore.Data.Models.Payment", "Payment")
-                        .WithMany()
-                        .HasForeignKey("PaymentId");
-
                     b.HasOne("BlazorStore.Data.Models.ApplicationUser", "Customer")
                         .WithMany()
                         .HasForeignKey("UserId");
@@ -502,8 +501,6 @@ namespace BlazorStore.Data.Migrations
                     b.Navigation("Appointment");
 
                     b.Navigation("Customer");
-
-                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("BlazorStore.Data.Models.Product", b =>
@@ -572,21 +569,6 @@ namespace BlazorStore.Data.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("OrderDetailsOrderModel", b =>
-                {
-                    b.HasOne("BlazorStore.Data.Models.OrderDetails", null)
-                        .WithMany()
-                        .HasForeignKey("OrderDetailsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BlazorStore.Data.Models.OrderModel", null)
-                        .WithMany()
-                        .HasForeignKey("OrdersOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

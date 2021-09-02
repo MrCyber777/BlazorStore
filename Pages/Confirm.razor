@@ -1,8 +1,14 @@
 ﻿
 @page "/confirm/{AppointmentId}"
+@using BlazorStore.Merchant
+@using Microsoft.Extensions.Configuration
+@using System.Globalization
+@inject IConfiguration _configuration
 @inject AppointmentService _db
 @inject ProductService _productDB
 @inject ProtectedLocalStorage _protectedLocalStorage
+@inject NavigationManager _nav 
+@inject IJSRuntime _js
 
 
 @if (currentAppointment is not null)
@@ -118,6 +124,13 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col">
+         <EditForm Model="currentAppointment" OnValidSubmit="ValidSubmitAsync">
+             <button type="submit" class="btn btn-success">Pay</button>
+         </EditForm>
+        </div>
+    </div>
   
 }
 else
@@ -131,58 +144,38 @@ else
 @*
     TODO Внедрить скрытую форму  PayPal. Внедрить все настройки PayPal. Кнопка Pay должна принадлежать скрытой форме Paypal. Сформировать товары для этой формы.
 *@
- @if (listOfProducts is not null)
- {
-     <form method="post" action="@paypal.PostUrl">
-        <input type="hidden" name="cmd" value="_cart" />
-        <input type="hidden" name="upload" value="1" />
-        <input type="hidden" name="business" value="@paypal.Business" />
-        <input type="hidden" name="currency_code" value="USD" />
-        @foreach (var item in listOfProducts)
-        {
-            <input type="hidden" name="item_name_@count" value="@item.Name" />
-            <input type="hidden" name="amount_@count" value="@item.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
-            <input type="hidden" name="quantity_@count" value="@item.Quantity" />
-            count++;
-
-        }
-        <div class="row">
-            <div class="col-sm-12  col-md-6 offset-3">
-                <input type="submit" value="Pay" class="btn btn-primary form-control" />
-            </div>
-        </div>
-
-    </form>
- }
-
-
 
 
 @code
 {
-    [Parameter] public Appointment Appointment { get; set; }
     [Parameter] public string AppointmentId { get; set; }
-    Appointment currentAppointment = new Appointment();
+
+    Appointment currentAppointment;
     int appointmentId;
     List<Product> listOfProducts;
     List<int> listOfShoppingCart;
-    int count = 1;
     double totalPrice;
-    PayPalConfig paypal;
+    string url;
 
     protected override async Task OnInitializedAsync()
     {
-        //appointmentId=Convert.ToInt32(AppointmentId.FromBase64());
+        appointmentId = Convert.ToInt32(AppointmentId.FromBase64());
         currentAppointment = new Appointment();
-        string stringId = AppointmentId.FromBase64();
-        appointmentId = Convert.ToInt32(stringId);
-        paypal = PayPal.GetPayPalConfig();
-
-        await DataInit();
 
         currentAppointment = await _db.GetSingleAppointmentAsync(appointmentId);
     }
-   
+    protected override  async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await DataInit();
+            var paypalAPI = new PayPalAPI(_configuration);
+            var stringPrice = totalPrice.ToString("#.##",CultureInfo.InvariantCulture);
+            var resultPrice = double.Parse(stringPrice, CultureInfo.InvariantCulture);
+            url = await paypalAPI.getRedirectUrlToPayPalAsync(resultPrice, "USD", appointmentId);
+            StateHasChanged();
+        }
+    }
 
     async Task DataInit()
     {
@@ -218,9 +211,10 @@ else
                 });
             }
         }
-
-        // 5. Дать команду Blazor перерисовать компонент
-        StateHasChanged();
+    }
+    async Task ValidSubmitAsync()
+    {
+        await _js.InvokeVoidAsync("RedirectTo",url);
     }
 
 }

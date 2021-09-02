@@ -1,7 +1,12 @@
 ﻿@page "/appointmentbooked"
+
+@using BlazorStore.Merchant
+@using Microsoft.Extensions.Configuration
 @using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager _nav
-@inject Appointment _db
+@inject AppointmentService _db
+@inject IConfiguration _configuration
+@inject PaymentService _payment
 
 <div class="container">
     <div class="row text-center">
@@ -20,65 +25,81 @@
             Please feel free to contact us anytime you have any questions
         </h6>
     </div>
-      
-        <div class="row">
-            <div class="col">
-                <div class="table-responsive">
-                    <table class="table table-striped border">
-                        <thead class="bg-info">
-                            <tr>Customer Name</tr>
-                            <tr>Customer Surname</tr>
-                            <tr>Appointment Day</tr>
-                            <tr>Customer Name</tr>
-                            <tr>Customer Phone Number</tr>
-                            <tr>Customer Email</tr>
-                            <tr>Address</tr>
-                            <tr>Zip</tr>
-                            <tr>City</tr>
-                            <tr>Country</tr>
-                            <tr>Is Confirmed</tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in listOfAppointments)
-                            {
-                                <tr>
-                                    <td><input class="form-control" @bind="item.CustomerName" readonly/></td>
-                                    <td><input class="form-control" @bind="item.CustomerSurname" readonly /></td>
-                                    <td><input class="form-control" @bind="item.AppointmentDay" readonly /></td>
-                                    <td><input class="form-control" @bind="item.AppointmentTime" readonly /></td>
-                                    <td><input class="form-control" @bind="item.CustomerPhoneNumber" readonly /></td>
-                                    <td><input class="form-control" @bind="item.CustomerEmail" readonly /></td>
-                                    <td><input class="form-control" @bind="item.Address" readonly /></td>
-                                    <td><input class="form-control" @bind="item.Zip" readonly /></td>
-                                    <td><input class="form-control" @bind="item.Country" readonly /></td>
-                                </tr>
 
-                            }
-                        </tbody>
-                    </table>
-                </div>
+    <div class="row">
+        <div class="col">
+            <div class="table-responsive">
+                <table class="table table-striped border">
+                    <thead class="bg-info">
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Customer Surname</th>
+                            <th>PayPalCustomer Email</th>
+                            <th>Shipping address</th>
+                            <th>Customer Email</th>
+                            <th>ZIP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (saveResult is not null)
+                        {
+                            <tr>
+                                <td>@saveResult.Appointment.CustomerName</td>
+                                <td>@saveResult.Appointment.CustomerSurname</td>
+                                <td>@saveResult.Payment.PayPalEmail</td>
+                                <td>@saveResult.Appointment.Address</td>
+                                <td>@saveResult.Appointment.CustomerEmail</td>
+                                <td>@saveResult.Appointment.Zip</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr class="row">
+                                <td colspan="6" class="col alert alert-info text-center">
+                                    Wait...
+                                </td>
+                            </tr>
+
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
-    
+    </div>
+
 </div>
 @code
 {
-    List<Appointment> listOfAppointments;
     Uri url;
-    static string txVal = string.Empty;
+    string payerId;
+    string paymentId;
     PayPalResponse responseResult;
-    protected override void OnAfterRender(bool firstRender)
+    OrderModel saveResult;
+
+
+
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             url = _nav.ToAbsoluteUri(_nav.Uri);
-            if (QueryHelpers.ParseQuery(url.Query).TryGetValue("tx", out var txValue))
+            if (QueryHelpers.ParseQuery(url.Query).TryGetValue("PayerID", out var payer))
+                payerId = payer;
+            if (QueryHelpers.ParseQuery(url.Query).TryGetValue("paymentId", out var payment))
+                paymentId = payment;
+
+            PayPalAPI payPalAPI = new(_configuration);
+            responseResult = await payPalAPI.executedPayment(paymentId, payerId);
+
+            if (responseResult is not null)
             {
-                txVal = txValue;
+                saveResult = await _payment.SavePaymentDetailsAsync(responseResult);
+                StateHasChanged();
             }
-            if (!string.IsNullOrWhiteSpace(txVal))
-                responseResult = PayPalResponse.Success(txVal);
         }
 
     }
+
 }

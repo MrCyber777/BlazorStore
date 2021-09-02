@@ -18,5 +18,10 @@ namespace BlazorStore.Data.Models
         public  virtual ApplicationUser Customer { get; set; }
         [ForeignKey(nameof(AppointmentId))]
         public  virtual Appointment Appointment { get; set; }
+
+        public int? PaymentId { get; set; }
+        [ForeignKey(nameof(PaymentId))]
+        public Payment Payment { get; set; }
+        public List<OrderDetails> OrderDetails { get; set; } = new();
     }
 }

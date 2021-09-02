@@ -15,6 +15,7 @@ namespace BlazorStore.Data
         public DbSet<Appointment>Appointments { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<OrderModel> Orders { get; set; }
-        public DbSet<OrderDetails> OrderDetails { get; set; }     
+        public DbSet<OrderDetails> OrderDetails { get; set; }  
+        public DbSet<Payment> PaymentDetails { get; set; } 
     }
 }

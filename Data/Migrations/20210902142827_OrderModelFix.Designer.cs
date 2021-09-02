@@ -4,14 +4,16 @@ using BlazorStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BlazorStore.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210902142827_OrderModelFix")]
+    partial class OrderModelFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,6 +113,8 @@ namespace BlazorStore.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OrderId");
+
                     b.HasIndex("ProductId");
 
                     b.HasIndex("UserId");
@@ -165,9 +169,6 @@ namespace BlazorStore.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PayerLastName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PaymentStatus")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("TotalPrice")
@@ -440,21 +441,6 @@ namespace BlazorStore.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("OrderDetailsOrderModel", b =>
-                {
-                    b.Property<int>("OrderDetailsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrdersOrderId")
-                        .HasColumnType("int");
-
-                    b.HasKey("OrderDetailsId", "OrdersOrderId");
-
-                    b.HasIndex("OrdersOrderId");
-
-                    b.ToTable("OrderDetailsOrderModel");
-                });
-
             modelBuilder.Entity("BlazorStore.Data.Models.ApplicationUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
@@ -468,6 +454,12 @@ namespace BlazorStore.Data.Migrations
 
             modelBuilder.Entity("BlazorStore.Data.Models.OrderDetails", b =>
                 {
+                    b.HasOne("BlazorStore.Data.Models.OrderModel", "Orders")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BlazorStore.Data.Models.Product", "Products")
                         .WithMany()
                         .HasForeignKey("ProductId")
@@ -477,6 +469,8 @@ namespace BlazorStore.Data.Migrations
                     b.HasOne("BlazorStore.Data.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
+
+                    b.Navigation("Orders");
 
                     b.Navigation("Products");
 
@@ -572,21 +566,6 @@ namespace BlazorStore.Data.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("OrderDetailsOrderModel", b =>
-                {
-                    b.HasOne("BlazorStore.Data.Models.OrderDetails", null)
-                        .WithMany()
-                        .HasForeignKey("OrderDetailsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BlazorStore.Data.Models.OrderModel", null)
-                        .WithMany()
-                        .HasForeignKey("OrdersOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

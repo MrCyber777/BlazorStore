@@ -10,6 +10,8 @@ namespace BlazorStore.Data.Models
     {
         public int Id { get; set; }
         [Required(ErrorMessage = "Please enter a name")]
+
+
         [MaxLength(50),MinLength(2)]
         public string CustomerName { get; set; }
         [Required(ErrorMessage = "Please enter a surname")]
@@ -33,7 +35,8 @@ namespace BlazorStore.Data.Models
         [NotMapped]
         public DateTime AppointmentTime { get; set; }
         public bool IsConfirmed { get; set; }
-        public List<Product> Products { get; set; }
+
+        
 
     }
 }

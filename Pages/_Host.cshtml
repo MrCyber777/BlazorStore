@@ -15,6 +15,11 @@
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
     <link href="BlazorStore.styles.css" rel="stylesheet" />
+    <script>
+        window.RedirectTo = (url) => {
+            window.location = url;
+        }
+    </script>
 </head>
 <body>
     <component type="typeof(App)" render-mode="ServerPrerendered" />

@@ -1,13 +1,21 @@
 ﻿@page "/appointment"
-@inject AppointmentService _db 
+@using BlazorInputFile
+@using System.IO
+
+@inject AppointmentService _db
+@inject ProductService _prod
+@inject PaymentService _payment
+
 <div class="container-fluid p-4">
-    <div class="row justify-content-between border border-info">
-        <div class="col-sm-12 col-md-5">
-            <h1 class="text-info">Appointment List</h1>
+    <div class="row justify-content-between text-center">
+        <div class="col-sm-12 col-md-12">
+            <h1 class="text-info">Appointments</h1>
         </div>
-        <div class="col-sm-12 col-md-3 text-right">
-            @*// TODO: Search Field and input*@
-        </div>
+        @*
+            <div class="col-sm-12 col-md-3 text-right">
+                @*// TODO: Search Field and input
+            </div>
+        *@
     </div>
     @if (appointments is null)
     {
@@ -20,46 +28,55 @@
     else if (appointments.Any())
     {
         <div class="row">
-            <div class="table-responsive">
-                <table class="table table-striped border">
-                    <thead class="bg-info">
-                        <tr>Customer Name</tr>
-                        <tr>Customer Surname</tr>
-                        <tr>Appointment Day</tr>
-                        <tr>Customer Name</tr>
-                        <tr>Customer Phone Number</tr>
-                        <tr>Customer Email</tr>
-                        <tr>Address</tr>
-                        <tr>Zip</tr>
-                        <tr>City</tr>
-                        <tr>Country</tr>
-                        <tr>Is Confirmed</tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in appointments)
-                        {
-                            <tr>
-                                <td>@item.CustomerName</td>
-                                <td>@item.CustomerSurname</td>
-                                <td>@item.AppointmentDay</td>
-                                <td>@item.AppointmentTime</td>                               
-                                @*//TODO*@
-                            </tr>
-                        }
-                    </tbody>
-                    <tfoot>
+
+
+            <table class="table table-striped">
+                <thead class="bg-info">
+                    <tr>
+                        <th>Customer Name</th>                       
+                        <th>Appointment Day</th>
+                        <th>Customer Number</th>
+                        <th>Customer Email</th>
+                        <th>Is Confirmed</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in appointments)
+                    {
                         <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>@item.CustomerName</td>                            
+                            <td>@item.AppointmentDay</td>
+                            <td>@item.CustomerPhoneNumber</td>
+                            <td>@item.CustomerEmail</td>
                             <td>
-                                Appointment Count: @appointments.Count
+                                <div class="btn-toolbar form-group">
+                                    <button type="button" class="btn btn-success mr-1">Confirm</button>
+                                    <button type="button" class="btn btn-primary mr-1" @onclick="()=>EditAppointmentHandler(item)">Edit</button>
+                                    <button type="button" class="btn btn-warning mr-1"@onclick="ShowProducts">Show Products</button>
+                                    @*<button type="button" class="btn btn-warning mr-1"@onclick="()=>PaymentDetailsHandler(item.Payment)">Payment Details</button>*@
+                                    <button type="button" class="btn btn-danger mr-1"@onclick="()=>DeleteAppointmentHandler(item)">Delete</button>
+                                </div>
                             </td>
+                            @*//TODO*@
                         </tr>
-                    </tfoot>
-                </table>
-            </div>
+
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            Appointment Count: @appointments.Count
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+
         </div>
     }
     else
@@ -71,55 +88,137 @@
         </div>
     }
     @*@if (showModal)
-    {
-        if (isDetails)
         {
-            <DetailsModalAppointment appointmentObj="appointmentObj" OnCloseModal="CloseModal" />
-        }
-        else
-        {
-            <AddEditModalAppointment appointmentObj="appointmentObj" OnCloseModal="CloseModal" OnValidSubmitHandler="ValidSubmitHandler"/>
-        }
-    }*@
+            if (isDetails)
+            {
+                <DetailsModalAppointment appointmentObj="appointmentObj" OnCloseModal="CloseModal" />
+            }
+            else
+            {
+                <AddEditModalAppointment appointmentObj="appointmentObj" OnCloseModal="CloseModal" OnValidSubmitHandler="ValidSubmitHandler"/>
+            }
+        }*@
 </div>
+@*<ProductModal @ref="modal" ProductDetails="productObj" OnCancel="CloseModal" OnConfirm="ValidSubmitHandler" OnHandleSelection="HandleSelection" OnSelectionCategoryChanged="OnSelectionCategoryChanged" OnSelectionSpecialTagsChanged="OnSelectionSpecialTagsChanged" Categories="categories" SpecialTags="specialTags" />*@
+@*<AppointmentModal @ref="modal" AppointmentDetails="appointmentObj" OnConfirm="ValidSubmitHandler" OnHandleSelection="HandleSelection" />*@
+<DetailsModalProduct @ref="modal" ProductDetails="productObj" OnCancel="CloseModal"/>
+<EditAppointmentModal @ref="_editAppointmentModal" AppointmentDetails="appointmentObj"  OnValidSubmitHandler="ValidSubmitHandler" OnCancel="CloseModal"/>
+@*<DetailsPaymentModal @ref="detailsPaymentModal" PaymenDetails="paymentObj" OnValidSubmitHandler="SubmitHandler" OnCancel="CloseModal"/>*@
+
+
 @code {
     List<Appointment> appointments;
+    List<Payment> payments;
+    List<Product> products;
+
+
+    [Parameter] public List<Product> Products { get; set; }
+    [Parameter] public EventCallback<Payment> OnConfirm { get; set; }
+
+
+
     Appointment appointmentObj = new();
+    Product productObj = new();
     bool showModal = false;
-    bool isDetails = false;
+    public byte[] ImageUploaded { get; set; }
+    //bool isEdit = false;
+
+    ModalStateEnum modalState = new();
+    DetailsModalProduct modal;
+    EditAppointmentModal _editAppointmentModal;
+    OrderDetails orderDetails;
+
+
+
 
     protected override async Task OnInitializedAsync()
     {
         appointments = await _db.GetAllAppointmentsAsync();
     }
+
+
     void CloseModal()
     {
-        showModal = false;
-        isDetails = false;
+        modal.Hide();
+        _editAppointmentModal.Hide();
+        //detailsPaymentModal.Hide();
+        //showModal = false;
+        //isDetails = false;
     }
     async Task ValidSubmitHandler()
     {
-        int result =0;
-        showModal = false;
-
-        //if (appointmentObj.Id.Equals(0))
-        //{
-        //    result = await _db.CreateAppointmentAsync(appointmentObj);
-        //}
-        //else
-        //{
-        result = await _db.UpdateAppointmentAsync(appointmentObj);
-        //}
+        _editAppointmentModal.Hide();
+        //detailsPaymentModal.Hide();
+        if (appointmentObj.Id.Equals(0))
+        {
+            var result = await _db.CreateAppointmentAsync(appointmentObj,Products);
+        }
+        else
+        {
+            var result = await _db.UpdateAppointmentAsync(appointmentObj);
+        }
         appointments = await _db.GetAllAppointmentsAsync();
+    }
+    //async Task SubmitHandler()
+    //{
+    //    detailsPaymentModal.Hide();
+    //    if (paymentObj.Id.Equals(0))
+    //    {
+    //        var result = await _payment.SavePaymentDetailsAsync(paymentObj,Payments);
+    //    }
+    //    payments = await _payment.GetAllPaymentsAsync();
+    //}
+    //void   ValidSubmitHandler()
+    //{
+    //    //int result = 0;
+    //    orderDetails = new();
+    //    //bool appointmentForDeletion = false;
+    //    //showModal = false;
+    //    productObj = orderDetails.Products;
+    //    modalState = ModalStateEnum.Read;
+    //    modal.Show(modalState);
+    //    //if (appointmentObj.Id.Equals(0))
+    //    //{
+    //    //    result = await _db.CreateAppointmentAsync(appointmentObj);
+    //    //}
+    //    // else
+    //    //  {
+    //    //result = await _db.UpdateAppointmentAsync(appointmentObj);
+    //    //    }
+    //    //appointments = await _db.GetAllAppointmentsAsync();
+    //}
+    void EditAppointmentHandler(Appointment appointmentForEdition)
+    {
+        appointmentObj = appointmentForEdition;
 
+        modalState = ModalStateEnum.Update;
+        _editAppointmentModal.Show(modalState);
+        //isEdit = true;
+        //showModal = true;
     }
-    void EditAppointmentHandler(Appointment appointmentForEdit)
+    void ShowProducts()
     {
-        appointmentObj = appointmentForEdit;
-        showModal = true;
+        modalState = ModalStateEnum.Read;
+        modal.Show(modalState);
     }
-    async Task DeleteAppointmentHandler(Appointment appointmentForDeletion)
+    //void ShowPaymentDetails()
+    //{
+    //    modalState = ModalStateEnum.Read;
+    //    detailsPaymentModal.Show(modalState);
+    //}
+
+    //void DetailsProductHandler(Product productDetails)
+    //{
+    //    productObj = productDetails;
+    //    modalState = ModalStateEnum.Read;
+    //    //modal.Show(modalState);
+    //    //showModal = true;
+    //}
+    async Task  DeleteAppointmentHandler(Appointment appointmentForDeletion)
     {
+        appointmentObj = appointmentForDeletion;
+        //modalState = ModalStateEnum.Delete;
+        //modal.Show(modalState);
         bool result = false;
         result = await _db.DeleteAppointmentAsync(appointmentForDeletion);
         appointments.Clear();
@@ -128,7 +227,26 @@
     void DetailsAppointmentHandler(Appointment appointmentForDetails)
     {
         appointmentObj = appointmentForDetails;
-        isDetails = true;
-        showModal = true;
+        modalState = ModalStateEnum.Read;
+        //modal.Show(modalState);
+        //isDetails = true;
+        //showModal = true;
+    }
+    void ProductDetailsHandler(OrderDetails orderDetails)
+    {
+        productObj = orderDetails.Products;
+        modalState = ModalStateEnum.Read;
+        //modal.Show(modalState);
+    }
+    async Task HandleSelection(IFileListEntry[] files)
+    {
+        var file = files.FirstOrDefault();
+        if (file is not null)
+        {
+            MemoryStream memoryStream = new();
+            await file.Data.CopyToAsync(memoryStream);
+            ImageUploaded = memoryStream.ToArray();
+            productObj.Image = ImageUploaded;
+        }
     }
 }

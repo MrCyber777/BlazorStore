@@ -16,9 +16,16 @@
         {
             <div class=" col col-sm-12 col-md-6 col-lg-3">
                 <div class="card mr-3 mb-3">
-                    <img src="@ImageToDisplayConverter(item.Image)" class="card-img-top" height="200" width="200" alt="@item.Name picture">
+                    @if (item.Image is not null)
+                    {
+                        <img src="@ImageToDisplayConverter(item.Image)" class="card-img-top" height="300" width="200" alt="@item.Name picture">
+                    }
+                    else
+                    {
+                        <img src="https://st4.depositphotos.com/1028437/21297/v/600/depositphotos_212975764-stock-illustration-image-available-sign.jpg" class="card-img-top" height="200" width="200" alt="@item.Name picture">
+                    }
                     <div class="card-body">
-                        <h5 class="card-title">@item.Name</h5>                       
+                        <h5 class="card-title">@item.Name</h5>
                     </div>
                     <div class="card-footer">
                         <div class="row">

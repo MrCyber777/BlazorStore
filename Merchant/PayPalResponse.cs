@@ -1,133 +1,119 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using System.Web;
 
-namespace BlazorStore.Data.Models
+namespace BlazorStore.Merchant
 {
     public class PayPalResponse
     {
-              
-        public double GrossTotal { get; set; }
-        public int InvoiceNumber { get; set; }
-        public string PaymentStatus { get; set; }
-        public string PayerFirstName { get; set; }
-        public double PaymentFee { get; set; }
-        public string BusinessEmail { get; set; }
-        public string PayerEmail { get; set; }
-        public string TxToken { get; set; }
-        public string PayerLastName { get; set; }
-        public string ReceiverEmail { get; set; }
-        public string ItemName { get; set; }
-        public string Currency { get; set; }
-        public string TransactionId { get; set; }
-        public string SubscriberId { get; set; }
-        public string Custom { get; set; }
+        public string id { get; set; }
+        public string intent { get; set; }
+        public string state { get; set; }
+        public string cart { get; set; }
+        public Payer payer { get; set; }
+        public Transaction[] transactions { get; set; }
+        public DateTime create_time { get; set; }
+        public Link[] links { get; set; }
 
-        static string authToken, txToken, query, strResponse;
-
-        public static PayPalResponse Success(string tx)
+        public class Payer
         {
-            var payPalConfig = PayPal.GetPayPalConfig();
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            authToken = payPalConfig.AuthToken;
-            txToken = tx;// Присваеваем данные сформированные с формы
-            query = string.Format($"cmd=_notify-synch&tx={txToken}&at={authToken}");//формируем запрос 
-            string url = payPalConfig.PostUrl;
-
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);// Создаем запрос к серверу Paypal
-            request.Method = "POST";
-            request.ContentType = "application/x-www-form-urlencoded";// Тип контента запроса отправляется из приложения по протоколу Http из формы в закодированном виде.
-            request.ContentLength = query.Length;
-
-            //Получаем запрос, прочитываем и помещаем в оперативную память.
-            StreamWriter strOut = new(request.GetRequestStream(), System.Text.Encoding.ASCII);
-            strOut.Write(query);
-            strOut.Close();
-
-            //Прочитываем из оперативной памяти 
-            StreamReader strIn = new(request.GetResponse().GetResponseStream());
-            strResponse = strIn.ReadToEnd();
-            strIn.Close();
-
-            if (strResponse.StartsWith("SUCCESS"))
-                return Parse(strResponse);
-            return null;
+            public string payment_method { get; set; }
+            public string status { get; set; }
+            public Payer_Info payer_info { get; set; }
         }
-        static PayPalResponse Parse(string postData)
+        public class Payer_Info
         {
-            string sKey, sValue;
-            PayPalResponse payPalResponse = new();
-            try
-            {
-                string[] stringArr = postData.Split('\n');// Разделяем строки и заносим в массив
-                for(int i = 1; i < stringArr.Length - 1; i++)
-                {
-                    string[] arr1 = stringArr[i].Split('=');//Разделяем строку на ключ и значение
-                    sKey = arr1[0];//Получаем ключ 
-                    sValue = HttpUtility.UrlDecode(arr1[1]);// Получаем значение свойства
-                    switch (sKey)
-                    {
-                        case "mc_gross":
-                            payPalResponse.GrossTotal = double.Parse(sValue, CultureInfo.InvariantCulture);
-                            break;
-                        case "invoce":
-                            payPalResponse.InvoiceNumber = Convert.ToInt32(sValue);
-                            break;
-                        case "payment_status":
-                            payPalResponse.PaymentStatus = sValue;
-                            break;
-                        case "first_name":
-                            payPalResponse.PayerFirstName = sValue;
-                            break;
-                        case "mc_fee":
-                            payPalResponse.PaymentFee = double.Parse(sValue, CultureInfo.InvariantCulture);
-                            break;
-                        case "business":
-                            payPalResponse.BusinessEmail = sValue;
-                            break;
-                        case "payer_email":
-                            payPalResponse.PayerEmail = sValue;
-                            break;
-                        case "Tx_Token":
-                            payPalResponse.TxToken = sValue;
-                            break;
-                        case "last_name":
-                            payPalResponse.PayerLastName = sValue;
-                            break;
-                        case "receiver_email":
-                            payPalResponse.ReceiverEmail = sValue;
-                            break;
-                        case "item_name":
-                            payPalResponse.ItemName = sValue;
-                            break;
-                        case "mc_currency":
-                            payPalResponse.Currency = sValue;
-                            break;
-                        case "txn_id":
-                            payPalResponse.TransactionId = sValue;
-                            break;
-                        case "custom":
-                            payPalResponse.Custom = sValue;
-                            break;
-                        case "subscr_id":
-                            payPalResponse.SubscriberId = sValue;
-                            break;
-                    }
-                }
-                return payPalResponse;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            
+            public string payer_id { get; set; }
+            public string email { get; set; }
+            public string first_name { get; set; }
+            public string last_name { get; set; }
+            public Shipping_Address shipping_address { get; set; }
+            public string country_code { get; set; }
+            public Billing_Address billing_address { get; set; }
+        }
+        public class Shipping_Address
+        {
+            public string recipient_name { get; set; }
+            public string line1 { get; set; }
+            public string city { get; set; }
+            public string state { get; set; }
+            public string postal_code { get; set; }
+            public string country_code { get; set; }           
+        }
+        public class Billing_Address
+        {
+            public string line1 { get; set; }
+            public string line2 { get; set; }
+            public string city { get; set; }
+            public string state { get; set; }
+            public string postal_code { get; set; }
+            public string country_code { get; set; }
+        }
+        public class Transaction
+        {
+            public Amount amount { get; set; }
+            public Payee payee { get; set; }
+            public Item_List item_list { get; set; }
+            public Related_Resources[] related_resources { get; set; }
+            public string description { get; set; }
+        }
+        public class Amount
+        {
+            public string total { get; set; }
+            public string currency { get; set; }
+            public Details details { get; set; }
+        }
+        public class Details
+        {
+            public string subtotal { get; set; }
+        }
+        public class Payee
+        {
+            public string merchant_id { get; set; }
+            public string email { get; set; }
+        }
+        public class Item_List
+        {
+            public Shipping_Address1 shipping_address { get; set; }
+        }
+        public class Shipping_Address1
+        {
+            public string recipient_name { get; set; }
+            public string line1 { get; set; }
+            public string city { get; set; }
+            public string state { get; set; }
+            public string postal_code { get; set; }
+            public string country_code { get; set; }
+        }
+        public class Related_Resources
+        {
+            public Sale sale { get; set; }
+        }
+        public class Sale
+        {
+            public string id { get; set; }
+            public string state { get; set; }
+            public Amount amount { get; set; }
+            public string payment_mode { get; set; }
+            public string protection_eligibility { get; set; }
+            public string protection_eligibility_type { get; set; }
+            public Transaction_Fee transaction_fee { get; set; }
+            public string parent_payment { get; set; }
+            public DateTime create_time { get; set; }
+            public DateTime update_time { get; set; }
+            public Link[] links { get; set; }
+        }
+        public class Transaction_Fee
+        {
+            public string value { get; set; }
+            public string currency { get; set; }
+        }
+        public class Link
+        {
+            public string href { get; set; }
+            public string rel { get; set; }
+            public string method { get; set; }
         }
     }
 }

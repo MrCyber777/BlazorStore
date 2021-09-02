@@ -1,0 +1,95 @@
+﻿
+@if (displayPaymentDetails)
+{
+        <div class="container-fluid p-4">
+            <div class="modal-backdrop show"></div>
+            <div class="modal" tabindex="-1" style="display:block;">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title  text-info">Payment Info</h4>
+                            <br />
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="OnCancel">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            @if (payments is null)
+                            {
+                                <div class="row">
+                                    <div class="col text-center">
+                                        <img src="https://media2.giphy.com/media/3oEjI6SIIHBdRxXI40/200.gif" height="200" />
+                                    </div>
+                                </div>
+                            }
+                            else if (payments.Any())
+                            {
+                              
+                                    <div class="row">
+                                        <table class=" table table-striped">
+                                            <thead class="bg-info text-center">
+                                                <tr>
+                                                    <th>TotalPrice</th>
+                                                    <th>PayPalEmail</th>
+                                                    <th>PayerFirstName</th>
+                                                    <th>PayerLastName</th>
+                                                </tr>
+                                                <br />
+                                            </thead>
+
+                                            <tbody>
+                                                <tr class="text-center">
+                                                    <td>@PaymenDetails.PayerFirstName</td>
+                                                    <td>@PaymenDetails.PayerLastName</td>
+                                                    <td>@PaymenDetails.PayPalEmail</td>
+                                                    <td>@PaymenDetails.TotalPrice</td>
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+
+
+
+                                    </div>
+                               
+                            }
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="OnCancel">Close</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>   
+}
+
+@code {
+    List<Payment> payments;
+    bool displayPaymentDetails = false;
+    bool readOnly = false;
+    ModalStateEnum actionStatus;
+
+
+    [Parameter] public Payment PaymenDetails { get; set; }
+
+    [Parameter] public EventCallback OnValidSubmitHandler { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    public void Hide() => displayPaymentDetails = false;
+
+    public void Show(ModalStateEnum _actionStatus)
+    {
+        displayPaymentDetails = true;
+
+        switch (_actionStatus)
+        {
+            case ModalStateEnum.Read:
+                readOnly = true;
+                actionStatus = _actionStatus;
+                break;
+
+        }
+    }
+}
