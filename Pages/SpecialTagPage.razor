@@ -1,5 +1,6 @@
 ﻿@page "/specialtag"
 @inject SpecialTagService _db
+@attribute [Authorize(Roles = "Admin")]
 <div class="container-fluid p-4">
     <div class="row justify-content-between border border-info">
         <div class="col-sm-12 col-md-5">
@@ -123,8 +124,8 @@
         specialTags.Clear();
         specialTags = await _db.GetAllSpecialTagsAsync();
     }
-    void  DetailsSpecialTagHandler(SpecialTag specialTagDetails)
-    {      
+    void DetailsSpecialTagHandler(SpecialTag specialTagDetails)
+    {
         specialTagObj = specialTagDetails;
         isDetails = true;
         showModal = true;

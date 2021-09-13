@@ -1,7 +1,9 @@
 ﻿
 using BlazorStore.Data.Models;
+using BlazorStore.Utility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -23,6 +25,15 @@ namespace BlazorStore.Data.Services
             Appointment appointmentFromDB = await _db.Appointments.FindAsync(id);
             return appointmentFromDB;
         }
+        public async Task<ApplicationUser> GetCurrentUserAsync()
+        {
+            var currentUser = (ClaimsIdentity)_httpContextAccessor.HttpContext.User.Identity;
+            var claim = currentUser.FindFirst(ClaimTypes.NameIdentifier);
+            var userId = claim?.Value;
+            var user = await _db.ApplicationUsers.FindAsync(userId);
+            return user;
+
+        }
         public async Task<List<Appointment>> GetAllAppointmentsAsync()
         {
             List<Appointment> appointmentsFromDB = await _db.Appointments.ToListAsync();
@@ -36,16 +47,20 @@ namespace BlazorStore.Data.Services
             await _db.Appointments.AddAsync(newAppointment);
             await _db.SaveChangesAsync();
 
+           
             // Получаем ИД пользователя
             var currentUser = _httpContextAccessor.HttpContext.User;// Получаем объект ClaimsPrincipal
             var claimsIdentity = (ClaimsIdentity)_httpContextAccessor.HttpContext.User.Identity;// Получаем информацию о пользователе (Identity)
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);// Получаем свойство NameIdentifier ( id ) 
             var userId = claim?.Value;
- 
+
+                    
             OrderModel order = new();
             order.AppointmentId = newAppointment.Id;
-            order.UserId = userId;
+            order.UserId = userId;           
             order.CreatedAt = System.DateTime.Now;
+           
+                                  
             await _db.Orders.AddAsync(order);
             await _db.SaveChangesAsync();
 
@@ -55,11 +70,13 @@ namespace BlazorStore.Data.Services
                 details.OrderId = order.OrderId;
                 details.UserId = userId;
                 details.ProductId = item.Id;
-                details.Quantity = item.Quantity;
+                details.Quantity = item.Quantity;  
+                
 
                 order.OrderDetails.Add(details);
             }
             _db.Orders.Update(order);
+            
             await _db.SaveChangesAsync();
 
             return newAppointment.Id;

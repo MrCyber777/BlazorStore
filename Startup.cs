@@ -36,6 +36,7 @@ namespace BlazorStore
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddRazorPages();
             services.AddServerSideBlazor();
@@ -46,7 +47,7 @@ namespace BlazorStore
             services.AddScoped<SpecialTagService>();
             services.AddScoped<ProductService>();
             services.AddScoped<AppointmentService>();
-            services.AddScoped<PaymentService>();
+            services.AddScoped<PaymentService>();          
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

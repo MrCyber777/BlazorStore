@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace BlazorStore.Data.Models
 {
+    public enum PaymentStatusEnum
+    {
+        Success,
+        Fail
+    }
     public class Payment
     {
         [Key]
@@ -15,7 +20,7 @@ namespace BlazorStore.Data.Models
         public string PayPalEmail { get; set; }
         public string PayerFirstName { get; set; }
         public string PayerLastName { get; set; }
-        public string PaymentStatus { get; set; }
+        public PaymentStatusEnum? PaymentStatus { get; set; }
 
     }
 }

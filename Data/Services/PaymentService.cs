@@ -29,7 +29,7 @@ namespace BlazorStore.Data.Services
                 return null;
             OrderModel orderFromDB = await _db.Orders.Include(x => x.Appointment)
                                                    .Include(x => x.Customer)
-                                                   .Include(x => x.OrderDetails)
+                                                   .Include(x => x.OrderDetails)                                                   
                                                    .FirstOrDefaultAsync(x => x.AppointmentId == appointmentId);
             if (orderFromDB is null)
                 return null;
@@ -40,7 +40,7 @@ namespace BlazorStore.Data.Services
             details.PayerLastName = response.payer.payer_info.last_name;
             details.PayPalEmail = response.payer.payer_info.email;
             details.TotalPrice = double.Parse(response.transactions[0].amount.total, CultureInfo.InvariantCulture);
-            details.PaymentStatus = "SUCCESS";
+            details.PaymentStatus = PaymentStatusEnum.Success;
 
             await _db.PaymentDetails.AddAsync(details);
             await _db.SaveChangesAsync();

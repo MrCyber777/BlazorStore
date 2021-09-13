@@ -1,0 +1,150 @@
+﻿@page "/register"
+@using Microsoft.AspNetCore.Components;
+@using Microsoft.AspNetCore.Identity;
+@using Microsoft.AspNetCore.WebUtilities;
+@using System.Text;
+@using Microsoft.AspNetCore.Identity.UI.Services;
+@using System.Text.Encodings.Web;
+@inject NavigationManager _nav
+@inject UserManager<IdentityUser> _userManager
+@inject IEmailSender _emailSender
+@inject RoleManager<IdentityRole> _roleManager
+
+<div class="p-4 row">
+    <EditForm Model="registerInputModel" OnValidSubmit="ValidSubmitHandler">
+        <h3 class="mt-1 text-info">Create A New Account</h3>
+        <hr />
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="row">
+            <div class="col">
+                @if (identityResult is not null && identityResult.Errors.Any())
+                {
+                    foreach (var item in identityResult.Errors)
+                    {
+                        <div class="text-danger">
+                            @item.Description
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+        <div class="row">            
+            <div class="col-sm-7 col-md-7 col-lg-3">
+                <div class="form-group">
+                    <label>Email</label>
+                    <InputText @bind-Value="registerInputModel.Email" class="form-control" />
+                    <ValidationMessage For="()=>registerInputModel.Email" class="text-danger" />
+                </div>
+                </div>
+            
+                    <div class="col-sm-7 col-md-7 col-lg-3">
+                        <div class="form-group">
+                        <label>LastName</label>
+                        <InputText @bind-Value="registerInputModel.LastName" class="form-control" />
+                        <ValidationMessage For="()=>registerInputModel.LastName" class="text-danger" />
+                         </div>
+                    </div>
+              
+
+
+                <div class="col-sm-7 col-md-7 col-lg-3">
+                    <div class="form-group">
+                        <label>Address</label>
+                        <InputText @bind-Value="registerInputModel.Address" class="form-control" />
+                        <ValidationMessage For="()=>registerInputModel.Address" class="text-danger" />
+                    </div>
+                </div>
+
+
+
+                <div class="col-sm-7 col-md-7 col-lg-3">
+                    <div class="form-group">
+                        <label>City</label>
+                        <InputText @bind-Value="registerInputModel.City" class="form-control" />
+                        <ValidationMessage For="()=>registerInputModel.City" class="text-danger" />
+                    </div>
+                </div>
+
+
+                <div class="col-sm-7 col-md-7 col-lg-3">
+                    <div class="form-group">
+                        <label>ZIP</label>
+                        <InputNumber @bind-Value="registerInputModel.Zip" class="form-control" />
+                        <ValidationMessage For="()=>registerInputModel.Zip" class="text-danger" />
+                    </div>
+                </div>
+
+
+                <div class="col-sm-7 col-md-7 col-lg-3">
+                    <div class="form-group">
+                        <label>Country</label>
+                        <InputText @bind-Value="registerInputModel.Country" class="form-control" />
+                        <ValidationMessage For="()=>registerInputModel.Country" class="text-danger" />
+                    </div>
+                </div>
+
+
+                <div class="col-sm-7 col-md-7 col-lg-3">
+                    <div class="form-group">
+                        <label>Password</label>
+                        <InputText type="password" @bind-Value="registerInputModel.Password" class="form-control" />
+                        <ValidationMessage For="()=>registerInputModel.Password" class="text-danger" />
+                    </div>
+                </div>
+
+
+                <div class="col-sm-7 col-md-7 col-lg-3">
+                    <div class="form-group">
+                        <label>Confirm password</label>
+                        <InputText type="password" @bind-Value="registerInputModel.ConfirmPassword" class="form-control" />
+                        <ValidationMessage For="()=>registerInputModel.ConfirmPassword" class="text-danger" />
+                    </div>
+                </div>
+            </div>
+
+        <button type="submit" class="btn btn-primary">Register</button>
+    </EditForm>
+</div>
+    
+    <div class="col-md-6 col-md-offset-2">
+
+    </div>
+
+
+@code
+{
+    RegisterInputModel registerInputModel = new();
+    IdentityResult identityResult;
+
+    async Task ValidSubmitHandler()
+    {
+        var user = new ApplicationUser { UserName = registerInputModel.Email, Email = registerInputModel.Email, FirstName = registerInputModel.FirstName, LastName = registerInputModel.LastName, Address = registerInputModel.Address, City = registerInputModel.City, Zip = registerInputModel.Zip, Country = registerInputModel.Country };
+        var result = await _userManager.CreateAsync(user, registerInputModel.Password);
+
+        if (result.Succeeded)
+        {
+            if (!await _roleManager.RoleExistsAsync(SD.User))
+                await _roleManager.CreateAsync(new IdentityRole(SD.User));
+            await _userManager.AddToRoleAsync(user, SD.User);
+
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = $"Identity/Account/ConfirmEmail/{user.Id}/{code}";
+            await _emailSender.SendEmailAsync(registerInputModel.Email, "Confirm your email",
+                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+            if (_userManager.Options.SignIn.RequireConfirmedAccount)
+            {
+                _nav.NavigateTo($"Identity/Account/RegisterConfirmation?email={user.Email}&returnUrl=%2F", forceLoad: true);// Если происходит переадресация на что-то отличное от BlazorComponent,то необходимо осуществить полную перерисовку
+            }
+            else
+            {
+                _nav.NavigateTo("/");
+            }
+
+        }
+        identityResult = result;
+
+    }
+
+}

@@ -1,10 +1,22 @@
 ﻿@inherits OwningComponentBase<AppointmentService>
 @inject NavigationManager _navManager
 
-<div class=" my-4 p-4 row">
+
+
+<div class="my-4 p-4 row">
+    <div class="row">
+        <div class="col-1">
+            <input type="checkbox" class="form-check-input" value="isChecked" @onchange="SameAddressHandler">
+        </div>
+        <div class="col">
+            <label class="form-check-label" for="checkbox-3">Same Address?</label>
+        </div>
+    </div>
+
     <EditForm Model="Appointment" OnValidSubmit="ValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
+
         <div class="row">
             <div class="col-sm-12  col-md-3 pb-3">
                 <div class="form-group">
@@ -76,6 +88,7 @@
 
 
         </div>
+
         <div class="row">
             <div class="col-sm-12  col-md-5">
                 <div class="form-group">
@@ -94,6 +107,8 @@
 
 @code
 {
+    bool isChecked = false;
+
     [Parameter] public Appointment Appointment { get; set; }
     [Parameter] public List<Product> Products { get; set; }
 
@@ -103,7 +118,7 @@
 
     async Task ValidSubmit()
     {
-        int result = await Service.CreateAppointmentAsync(Appointment,Products);
+        int result = await Service.CreateAppointmentAsync(Appointment, Products);
         if (!result.Equals(0))
         {
             // TODO: Написать метод расширения для конвертации ID в Base64
@@ -116,6 +131,32 @@
             // TODO: Написать метод обратной конвертации из Base64 в int
             // TODO: Вывести в компонент всю информацию о заказе
         }
+    }
+    async Task SameAddressHandler()
+    {
+        isChecked = !isChecked;
+        if (isChecked)
+        {
+            var currentUser = await Service.GetCurrentUserAsync();
+            Appointment.Address = currentUser.Address;
+            Appointment.City = currentUser.City;
+            Appointment.Country = currentUser.Country;
+            Appointment.CustomerEmail = currentUser.Email;
+            Appointment.CustomerName = currentUser.FirstName;
+            Appointment.CustomerSurname = currentUser.LastName;
+            Appointment.CustomerPhoneNumber = currentUser.PhoneNumber;
+            Appointment.Zip = currentUser.Zip;
+            Appointment.AppointmentDay = DateTime.Now.AddDays(14);
+
+
+        }
+        else
+        {
+            Appointment = new();
+            Appointment.AppointmentDay = DateTime.Now;
+        }
+        StateHasChanged();
+
     }
 
 }
