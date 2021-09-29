@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 
 namespace BlazorStore.Areas.Identity.Pages.Account
 {
-    [Authorize(Roles = SD.SuperAdminEndUser)]
+    //[Authorize(Roles = SD.SuperAdminEndUser)]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<IdentityUser> _signInManager;
@@ -62,14 +62,14 @@ namespace BlazorStore.Areas.Identity.Pages.Account
             [MaxLength(50), MinLength(2)]
             public string LastName { get; set; }
 
-            [Required(ErrorMessage = "Please enter the first address line")]
-            [Display(Name = "Address 1"), MaxLength(255), MinLength(3)]
-            public string Address { get; set; }
-            [Required(ErrorMessage = "Please enter  a city name"), MaxLength(50), MinLength(2)]
-            public string City { get; set; }
-            public int Zip { get; set; }
-            [Required(ErrorMessage = "Please enter a country name"), MaxLength(50), MinLength(2)]
-            public string Country { get; set; }
+            //[Required(ErrorMessage = "Please enter the first address line")]
+            //[Display(Name = "Address 1"), MaxLength(255), MinLength(3)]
+            //public string Address { get; set; }
+            //[Required(ErrorMessage = "Please enter  a city name"), MaxLength(50), MinLength(2)]
+            //public string City { get; set; }
+            //public int Zip { get; set; }
+            //[Required(ErrorMessage = "Please enter a country name"), MaxLength(50), MinLength(2)]
+            //public string Country { get; set; }
 
 
             [Required]
@@ -85,8 +85,7 @@ namespace BlazorStore.Areas.Identity.Pages.Account
             [Display(Name = "Super admin")]
             public bool IsSuperAdmin { get; set; }
 
-            [Display(Name = "User")]
-            public bool IsUser { get; set; }
+           
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -101,7 +100,7 @@ namespace BlazorStore.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email, FirstName=Input.FirstName,LastName=Input.LastName,Address=Input.Address,City=Input.City,Zip=Input.Zip,Country=Input.Country };
+                var user = new AdminUser { UserName = Input.Email, Email = Input.Email, FirstName=Input.FirstName,LastName=Input.LastName };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
@@ -109,13 +108,10 @@ namespace BlazorStore.Areas.Identity.Pages.Account
                          await _roleManager.CreateAsync(new IdentityRole(SD.AdminEndUser));
                     if (!await _roleManager.RoleExistsAsync(SD.SuperAdminEndUser))
                         await _roleManager.CreateAsync(new IdentityRole(SD.SuperAdminEndUser));
-                    if (!await _roleManager.RoleExistsAsync(SD.User))
-                        await _roleManager.CreateAsync(new IdentityRole(SD.User));
+                    
 
                     if(Input.IsSuperAdmin)
-                        await _userManager.AddToRoleAsync(user, SD.SuperAdminEndUser);
-                    if (Input.IsUser)
-                        await _userManager.AddToRoleAsync(user, SD.User);
+                        await _userManager.AddToRoleAsync(user, SD.SuperAdminEndUser);                    
                     else
                         await _userManager.AddToRoleAsync(user, SD.AdminEndUser);
                     _logger.LogInformation("User created a new account with password.");

@@ -19,7 +19,17 @@ namespace BlazorStore.Data.Services
         {
             _db = db;
             _httpContextAccessor = httpContextAccessor;
-        }        
+        }  
+        public async Task<OrderModel> GetSinglePaymentAsync(int? id)
+        {
+            if (id is null)
+                return null;
+            var paymentFromDB = await _db.Orders.Include(x => x.Customer)
+                                                    .Include(x => x.OrderDetails).ThenInclude(x => x.Products)
+                                                    .Include(x=>x.Payment)
+                                                    .FirstOrDefaultAsync(x => x.AppointmentId == id);
+            return paymentFromDB;                                           
+        }
       
         public async Task<OrderModel> SavePaymentDetailsAsync(PayPalResponse response)
         {

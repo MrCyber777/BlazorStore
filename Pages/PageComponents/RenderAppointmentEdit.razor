@@ -1,0 +1,72 @@
+﻿@typeparam TValue
+@if (showModal)
+{
+    <div class="modal-backdrop show"></div>
+    <div class="modal" tabindex="-1" style="display:block;">
+
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title  text-info">Edit Appointment</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="ShowCloseModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @*<DataAnnotationsValidator />*@
+                    @*<ValidationSummary />*@
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="row form-group">
+                                <div class="col-4">Customer Name</div>
+                                <div class="col-8">
+                                    <input class="form-control" @bind="AppointmentDetails.CustomerName" disabled="@readOnly" />
+                                    @*<ValidationMessage For="(() => AppointmentDetails.CustomerName)" />*@
+                                </div>
+                            </div>
+
+
+                            <div class="row form-group">
+                                <div class="col-4">Email</div>
+                                <div class="col-8">
+                                    <input class="form-control" @bind="AppointmentDetails.CustomerEmail" disabled="@readOnly" />
+                                    @*<ValidationMessage For="(() =>AppointmentDetails.CustomerEmail)" />*@
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-4">Customer Number</div>
+                                <div class="col-8">
+                                    <input class="form-control" @bind="AppointmentDetails.CustomerPhoneNumber" disabled="@readOnly" />
+                                    @*<ValidationMessage For="(() =>AppointmentDetails.CustomerEmail)" />*@
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="ShowCloseModal">Close</button>
+                        <button type="submit" class="btn btn-primary" @onclick="OnValidSubmitHandler">Save changes</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+@code {
+
+    bool showModal = false;
+    bool readOnly = false;
+
+    [Parameter] public RenderFragment Header { get; set; }
+    [Parameter] public RenderFragment<TValue> ChildContent { get; set; }
+    [Parameter] public TValue Item { get; set; }
+    [Parameter] public Appointment AppointmentDetails { get; set; }
+    [Parameter] public EventCallback OnValidSubmitHandler { get; set; }
+
+
+
+    public void ShowCloseModal() => showModal = !showModal;
+}

@@ -5,7 +5,7 @@
 @inject AppointmentService _db
 @inject ProductService _prod
 @inject PaymentService _payment
-@attribute [Authorize(Roles ="Admin")]
+@attribute [Authorize(Roles = SD.AdminEndUser + "," + SD.SuperAdminEndUser)]
 <div class="container-fluid p-4">
     <div class="row justify-content-between text-center">
         <div class="col-sm-12 col-md-12">
@@ -16,6 +16,12 @@
                 @*// TODO: Search Field and input
             </div>
         *@
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <div class="col text-center alert alert-danger">
+                @message
+            </div>
+        }
     </div>
     @if (appointments is null)
     {
@@ -51,12 +57,12 @@
                             <td>@item.CustomerEmail</td>
 
                             <td>
-                                <div class="btn-toolbar form-group">
-                                    <button type="button" class="btn btn-success mr-1 my-1">Confirm</button>
-                                    <button type="button" class="btn btn-primary mr-1 my-1" @onclick="()=>EditAppointmentHandler(item)">Edit</button>
-                                    <button type="button" class="btn btn-warning mr-1 my-1" @onclick="ShowProducts">Show Products</button>
-                                    @*<button type="button" class="btn btn-warning mr-1"@onclick="()=>PaymentDetailsHandler(item.Payment)">Payment Details</button>*@
-                                    <button type="button" class="btn btn-danger mr-1 my-1" @onclick="()=>DeleteAppointmentHandler(item)">Delete</button>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-success"><i class="far fa-check-circle"></i></button>
+                                    <button type="button" class="btn btn-primary" @onclick="()=>EditAppointmentHandler(item)"><i class="fas fa-edit"></i></button>
+                                    <button type="button" class="btn btn-warning" @onclick="() => ShowProducts(item.Id)"><i class="fas fa-list"></i></button>
+                                    <button type="button" class="btn btn-dark" @onclick="()=>ShowPaymentDetails(item.Id)"><i class="fas fa-info-circle"></i></button>
+                                    <button type="button" class="btn btn-danger" @onclick="()=>DeleteAppointmentHandler(item)"><i class="fas fa-trash"></i></button>
                                 </div>
                             </td>
                             @*//TODO*@
@@ -100,20 +106,91 @@
             }
         }*@
 </div>
+
 @*<ProductModal @ref="modal" ProductDetails="productObj" OnCancel="CloseModal" OnConfirm="ValidSubmitHandler" OnHandleSelection="HandleSelection" OnSelectionCategoryChanged="OnSelectionCategoryChanged" OnSelectionSpecialTagsChanged="OnSelectionSpecialTagsChanged" Categories="categories" SpecialTags="specialTags" />*@
 @*<AppointmentModal @ref="modal" AppointmentDetails="appointmentObj" OnConfirm="ValidSubmitHandler" OnHandleSelection="HandleSelection" />*@
-<DetailsModalProduct @ref="modal" ProductDetails="productObj" OnCancel="CloseModal" />
-<EditAppointmentModal @ref="_editAppointmentModal" AppointmentDetails="appointmentObj" OnValidSubmitHandler="ValidSubmitHandler" OnCancel="CloseModal" />
+@*<DetailsModalProduct @ref="modal" ProductDetails="productObj" OnCancel="CloseModal" />
+    <EditAppointmentModal @ref="_editAppointmentModal" AppointmentDetails="appointmentObj" OnValidSubmitHandler="ValidSubmitHandler" OnCancel="CloseModal" />*@
 @*<DetailsPaymentModal @ref="detailsPaymentModal" PaymenDetails="paymentObj" OnValidSubmitHandler="SubmitHandler" OnCancel="CloseModal"/>*@
+<RenderProducts Items="productsInCurrentAppointment" Context="OrderDetails" @ref="renderModal">
+    <Header>
+        <div class="row bg-info position-sticky align-items-center text-center" style="height: 50px">
+            <div class="col">
+                Image
+            </div>
+            <div class="col">
+                Product Name
+            </div>
+            <div class="col">
+                Quantity
+            </div>
+        </div>
+    </Header>
+    <ChildContent>
+        <hr />
+        <div class="row mb-3 align-items-center text-center">
+            <div class="col">
+                <img src="@OrderDetails.Products.Image.ImageToDisplayConverter()" class="img-fluid img-thumbnail" style="height: 100px" />
+            </div>
+            <div class="col">
+                @OrderDetails.Products.Name
+            </div>
+            <div class="col">
+                @OrderDetails.Quantity
+            </div>
+        </div>
+        <hr />
+    </ChildContent>
+</RenderProducts>
+<RenderPaymentDetails @ref="renderPaymentModal" TValue="OrderModel" Item="currentOder">
+    <Header>
+        <div class="row bg-info position-sticky align-items-center text-center" style="height: 50px">
+            <div class="col">
+                Payment Details Id
+            </div>
+            <div class="col">
+                Payment Price
+            </div>
+            <div class="col">
+                Payment Status
+            </div>
+        </div>
+    </Header>
+    <ChildContent>
+        <hr />
+        <div class="row mb-3 align-items-center text-center">
+            <div class="col">
+                @context.Payment.Id
+            </div>
+            <div class="col">
+                @string.Format("{0:C}", @context.Payment.TotalPrice)
+            </div>
+            <div class="col">
+                @context.Payment.PaymentStatus
+            </div>
+        </div>
+        <hr />
+    </ChildContent>
+</RenderPaymentDetails>
+
+
+
+
 
 
 @code {
     List<Appointment> appointments;
     List<Product> products;
+    List<OrderDetails> productsInCurrentAppointment;
+    OrderModel currentOder;
+
+    RenderProducts<OrderDetails> renderModal;
+    RenderAppointmentEdit<OrderDetails> renderAppointmentEditModal;
+    RenderPaymentDetails<OrderModel> renderPaymentModal;
 
 
     [Parameter] public List<Product> Products { get; set; }
-    [Parameter] public EventCallback<Payment> OnConfirm { get; set; }
+
 
 
 
@@ -121,6 +198,7 @@
     Product productObj = new();
     bool showModal = false;
     public byte[] ImageUploaded { get; set; }
+    string message = string.Empty;
     //bool isEdit = false;
 
     ModalStateEnum modalState = new();
@@ -196,16 +274,39 @@
         //isEdit = true;
         //showModal = true;
     }
-    void ShowProducts()
+    async Task ShowProducts(int appointmentId)
     {
-        modalState = ModalStateEnum.Read;
-        modal.Show(modalState);
+        //modalState = ModalStateEnum.Read;
+        //modal.Show(modalState);
+        var order = await _payment.GetSinglePaymentAsync(appointmentId);
+        if (order is not null)
+        {
+            productsInCurrentAppointment = order.OrderDetails;
+            renderModal.ShowCloseModal();
+        }
+        else
+        {
+            message = $"Order details by Id:{appointmentId} not found";
+
+        }
     }
-    //void ShowPaymentDetails()
-    //{
-    //    modalState = ModalStateEnum.Read;
-    //    detailsPaymentModal.Show(modalState);
-    //}
+    async Task ShowPaymentDetails(int appointmentId)
+    {
+        currentOder = await _payment.GetSinglePaymentAsync(appointmentId);
+        if (currentOder is not null)
+        {
+            renderPaymentModal.ShowCloseModal();
+        }
+        else
+        {
+            message = $"Current payment by Id:{appointmentId} is not found";
+        }
+        //orderDetails = currentOder.OrderDetails.ToList();
+        //products = details.Select(x => x.Products).ToList();
+
+        //modalState = ModalStateEnum.Read;
+        //detailsPaymentModal.Show(modalState);
+    }
 
     //void DetailsProductHandler(Product productDetails)
     //{

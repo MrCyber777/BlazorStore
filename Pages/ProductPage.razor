@@ -1,4 +1,5 @@
 ﻿@page "/product"
+@page "/product/{PageNumber:int}"
 
 @using BlazorInputFile
 @using System.IO
@@ -15,7 +16,7 @@
 
 
 
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = SD.AdminEndUser + "," + SD.SuperAdminEndUser)]
 
 <div class="container-fluid p-4">
     <div class="row justify-content-between border border-info">
@@ -36,6 +37,23 @@
     }
     else if (products.Any())
     {
+
+        @*<span><a href="/product/@i">|</a></span>*@
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @((PageNumber<=1)?"disabled":"")">
+                    <a class="page-link" href="product/@(PageNumber-1)" aria-disabled="@((PageNumber<=1) ?"true":"false")">Previous</a>
+                </li>
+                @for (int i = 1; i <= SD.PageSize+1; i++)
+                {
+                    <li class="page-item @((PageNumber==i)?"active":"")"><a class="page-link" href="product/@i">@i</a></li>
+                }
+                <li class="page-item @((PageNumber<=totalCount/SD.PageSize)?"":"disabled")">
+                    <a class="page-link" href="product/@(PageNumber+1)" aria-disabled="@((PageNumber<=totalCount/SD.PageSize?"false":"true"))">Next</a>
+                </li>
+            </ul>
+        </nav>
+
         <div class="row">
             <table class="table table-striped my-3">
                 <thead class="bg-info">
@@ -88,7 +106,7 @@
                         <td></td>
                         <td></td>
                         <td>
-                            Product Count: @products.Count
+                            Product Count: @totalCount
                         </td>
                     </tr>
                 </tfoot>
@@ -133,6 +151,9 @@
 
 
 @code {
+    [Parameter] public int PageNumber { get; set; }
+
+
     List<Product> products;
     List<SpecialTag> specialTags;
     List<Category> categories;
@@ -144,13 +165,26 @@
     ModalStateEnum modalState = new();
     ProductModal modal;
 
+    //int pageSize = 7;
+    int totalCount;
+    //int pageNumber = 1;
+
     protected override async Task OnInitializedAsync()
     {
-        products = await _db.GetAllProductsAsync();
         specialTags = await _db.GetAllSpecialTagsAsync();
         categories = await _db.GetAllCategoriesAsync();
+
         //modalState = ModalStateEnum.None;
     }
+
+    protected override void OnParametersSet()
+    {
+        if (PageNumber < 1)
+            PageNumber = 1;
+
+        products = _db.GetSortedProductsAsync(PageNumber, out totalCount);
+    }
+
 
     void AddNewProduct()
     {
@@ -208,7 +242,7 @@
             products.Clear();
         }
 
-        products = await _db.GetAllProductsAsync();
+        products = _db.GetSortedProductsAsync(PageNumber, out totalCount);
     }
     void EditProductHandler(Product productForEdit)
     {

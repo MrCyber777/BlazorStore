@@ -1,6 +1,8 @@
 ﻿@page "/category"
+@page "/category/{PageNumber:int}"
 @inject CategoryService _db
-@attribute [Authorize(Roles = "Admin")]
+@inject  NavigationManager _nav
+@attribute [Authorize(Roles = SD.AdminEndUser + "," + SD.SuperAdminEndUser)]
 <div class="container-fluid p-4">
     <div class="row justify-content-between border border-info">
         <div class="col-sm-12 col-md-5">
@@ -19,7 +21,8 @@
         </div>
     }
     else if (categories.Any())
-    {
+    {   
+        <PaginationComponent @ref="paginationComponent"  PageNumber="PageNumber" PageSize="SD.PageSize" TotalCount="totalCount"TValue="Category"Items="categories"></PaginationComponent>
         <div class="row">
             <table class="table table-striped">
                 <thead class="bg-info">
@@ -44,7 +47,7 @@
                     <tr>
                         <td></td>
                         <td>
-                            Category Count: @categories.Count
+                            Category Count: @totalCount
                         </td>
                     </tr>
                 </tfoot>
@@ -104,15 +107,35 @@
 
 
 @code {
+    [Parameter]public int PageNumber { get; set; }
     List<Category> categories;
     Category categoryObj = new();
     bool showModal = false;
+    PaginationComponent<Category>paginationComponent;
+    int totalCount;
+    //PagedResult<Category> pagedResult = new();
 
 
     protected override async Task OnInitializedAsync()
     {
         categories = await _db.GetAllCategoriesAsync();
+
+        //modalState = ModalStateEnum.None;
     }
+
+    protected override void  OnParametersSet()
+    {
+        //categories = await _db.GetAllCategoriesAsync();
+        if (PageNumber < 1) PageNumber = 1;
+        categories = _db.GetSortedCategoriesAsync(PageNumber,  out totalCount);
+        //pagedResult.CurrentPage = PageNumber;
+        //pagedResult.PageSize = SD.PageSize;
+        //pagedResult.Results = categories;
+    }
+    //void PagerPageChanged(int page)
+    //{
+    //    _nav.NavigateTo("/category/" + page);
+    //}
     void AddNewCategory()
     {
         categoryObj = new();
@@ -143,7 +166,8 @@
         }
 
         // 4. Обновить список всех категорий
-        categories = await _db.GetAllCategoriesAsync();
+        //categories = await _db.GetAllCategoriesAsync();
+        categories =  _db.GetSortedCategoriesAsync(PageNumber, out totalCount);
     }
     void EditCategoryHandler(Category catForEdit)
     {

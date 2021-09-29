@@ -1,7 +1,9 @@
 ﻿
 using BlazorStore.Data.Models;
+using BlazorStore.Utility;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BlazorStore.Data.Services
@@ -20,6 +22,18 @@ namespace BlazorStore.Data.Services
 
             // 2
             //return await _db.Categories.FindAsync(id);
+        }
+        public List<Category>GetSortedCategoriesAsync(int pageIndex,  out int totalCount)
+        {
+          
+            totalCount =  _db.Categories.Count();
+
+            var categoriesFromDB = Task.Run(async () => await _db.Categories.Skip((pageIndex - 1) * SD.PageSize)
+                                                               .Take(SD.PageSize)
+                                                               .ToListAsync()).Result;
+
+            return categoriesFromDB;
+
         }
         public async Task<List<Category>> GetAllCategoriesAsync()
         {

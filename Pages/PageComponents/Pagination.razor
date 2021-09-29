@@ -1,0 +1,60 @@
+﻿@typeparam TValue
+<div class="row">
+    <div class="col">
+        <button class="btn btn-secondary" @onclick="@(x=>NavigateTo("Previous"))">Previous</button>
+        <button class="btn btn-secondary" @onclick="@(x=>NavigateTo("First"))">@("<<<")</button>
+        @for (int i = 0; i < TotalPages; i++)
+        {
+            var pageNumber = i;
+            <button class="btn @(CurrentPage==pageNumber?"btn-dark":"btn-info")" @onclick="@(x=>UpdateList(pageNumber))">@(i+1)</button>
+        }
+        <button class="btn btn-secondary" @onclick="@(x=>NavigateTo("Next"))">Next</button>
+        <button class="btn btn-secondary" @onclick="@(x=>NavigateTo("Last"))">@(">>>")</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<TValue> Items { get; set; }
+
+
+
+    public List<TValue> ItemList { get; set; }
+    public int PageSize { get; set; }
+    public int TotalPages { get; set; }
+    public int CurrentPage { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        PageSize = 7;
+        ItemList = Items.Take(PageSize).ToList();
+        TotalPages = (int)Math.Ceiling(Items.Count() / (decimal)PageSize);
+    }
+    private void UpdateList(int pageNumber)
+    {
+        ItemList = Items.Skip(pageNumber * PageSize).Take(PageSize).ToList();
+        CurrentPage = pageNumber;
+    }
+    private void NavigateTo(string direction)
+    {
+        if (direction == "previous" && CurrentPage != 0)
+            CurrentPage -= 1;
+        if (direction == "next" && CurrentPage != TotalPages - 1)
+            CurrentPage += 1;
+        if (direction == "First")
+            CurrentPage = 0;
+        if (direction == "Last")
+            CurrentPage = TotalPages - 1;
+
+        UpdateList(CurrentPage);
+    }
+    public List<TValue> SetItems(List<TValue>itemList)
+    {
+        Items = itemList;
+
+        PageSize = 7;
+        ItemList = Items.Take(PageSize).ToList();
+        TotalPages = (int)Math.Ceiling(Items.Count() / (decimal)PageSize);
+
+        return ItemList;
+    }
+}

@@ -1,6 +1,6 @@
 ﻿@page "/specialtag"
 @inject SpecialTagService _db
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = SD.AdminEndUser + "," + SD.SuperAdminEndUser)]
 <div class="container-fluid p-4">
     <div class="row justify-content-between border border-info">
         <div class="col-sm-12 col-md-5">

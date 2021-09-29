@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject ProtectedLocalStorage _protectedCart
+
 <div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">Blazor Store</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -14,58 +15,72 @@
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="category">
-                <span class="oi oi-plus" aria-hidden="true"></span>Category
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="specialtag">
-                <span class="oi oi-plus" aria-hidden="true"></span>SpecialTags
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="product">
-                <span class="oi oi-plus" aria-hidden="true"></span>Products
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="appointment">
-                <span class="oi oi-plus" aria-hidden="true"></span>Appointments
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </li>
-        @*<li class="nav-item px-3">
-            <NavLink class="nav-link" href="appointmentbooked">
-                <span class="oi oi-list-rich" aria-hidden="true"></span>Booked
-            </NavLink>
-        </li>*@
+        <AuthorizeView Roles="@(SD.AdminEndUser + "," + SD.SuperAdminEndUser)">
+
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="category">
+                    <span class="oi oi-plus" aria-hidden="true"></span>Category
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="specialtag">
+                    <span class="oi oi-plus" aria-hidden="true"></span>SpecialTags
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="product">
+                    <span class="oi oi-plus" aria-hidden="true"></span>Products
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="appointment">
+                    <span class="oi oi-plus" aria-hidden="true"></span>Appointments
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="fetchdata">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
+                </NavLink>
+            </li>
+            @*<li class="nav-item px-3">
+                <NavLink class="nav-link" href="appointmentbooked">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span>Booked
+                </NavLink>
+            </li>*@
+        </AuthorizeView>
     </ul>
+     @if (userInfo.User.IsInRole(SD.User))
+     {
     <div class="px-3 text-center">
         <NavLink class="nav-link" href="shoppingcart">
             <span class="oi oi-cart cart-icon" aria-hidden="true"></span>
             <label class="cart">@productCount</label>
         </NavLink>
     </div>
+     }
 </div>
 
+
 @code {
+    [CascadingParameter] Task<AuthenticationState> authenticationStateTask { get; set; }
     int productCount = 0;
     List<int> shoppingCartList;
     private bool collapseNavMenu = true;
+    AuthenticationState userInfo;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    protected override async Task OnInitializedAsync()
+    {
+        userInfo = await authenticationStateTask;
+        
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-       
-            shoppingCartList = await _protectedCart.GetFromSession<List<int>>(SD.SessionKey);
-            productCount = shoppingCartList is not null && shoppingCartList.Any() ? shoppingCartList.Count : 0;
-            StateHasChanged();
-     
+
+        shoppingCartList = await _protectedCart.GetFromSession<List<int>>(SD.SessionKey);
+        productCount = shoppingCartList is not null && shoppingCartList.Any() ? shoppingCartList.Count : 0;
+        StateHasChanged();
+
 
     }
 
