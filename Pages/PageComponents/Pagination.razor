@@ -16,8 +16,6 @@
 @code {
     [Parameter] public List<TValue> Items { get; set; }
 
-
-
     public List<TValue> ItemList { get; set; }
     public int PageSize { get; set; }
     public int TotalPages { get; set; }
@@ -47,7 +45,7 @@
 
         UpdateList(CurrentPage);
     }
-    public List<TValue> SetItems(List<TValue>itemList)
+    public List<TValue> SetItems(List<TValue> itemList)
     {
         Items = itemList;
 

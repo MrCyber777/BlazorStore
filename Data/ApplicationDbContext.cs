@@ -1,6 +1,7 @@
 ﻿using BlazorStore.Data.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+
 namespace BlazorStore.Data
 {
     public class ApplicationDbContext : IdentityDbContext
@@ -9,14 +10,17 @@ namespace BlazorStore.Data
             : base(options)
         {
         }
+
         public DbSet<Category> Categories { get; set; }
         public DbSet<SpecialTag> SpecialTags { get; set; }
         public DbSet<Product> Products { get; set; }
-        public DbSet<Appointment>Appointments { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<OrderModel> Orders { get; set; }
-        public DbSet<OrderDetails> OrderDetails { get; set; }  
-        public DbSet<Payment> PaymentDetails { get; set; } 
+        public DbSet<OrderDetails> OrderDetails { get; set; }
+        public DbSet<Payment> PaymentDetails { get; set; }
         public DbSet<AdminUser> AdminUsers { get; set; }
+        public DbSet<MacBlackList> MacBlackLists { get; set; }
+        public DbSet<IPBlackList> IPBlackLists { get; set; }
     }
 }

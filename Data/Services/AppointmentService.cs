@@ -1,10 +1,9 @@
 ﻿
 using BlazorStore.Data.Models;
-using BlazorStore.Utility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -17,7 +16,7 @@ namespace BlazorStore.Data.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
        public AppointmentService(ApplicationDbContext db,IHttpContextAccessor httpContextAccessor)
         {
-            _db = db;
+            _db = db;          
             _httpContextAccessor = httpContextAccessor;
         }
         public async Task<Appointment> GetSingleAppointmentAsync(int id)
@@ -38,6 +37,15 @@ namespace BlazorStore.Data.Services
         {
             List<Appointment> appointmentsFromDB = await _db.Appointments.ToListAsync();
             return appointmentsFromDB;
+        }
+        public async Task<Appointment> ConfirmAppointmentAsync(int id)
+        {
+            var appointmentFromDB = await _db.Appointments.FindAsync(id);
+            if (appointmentFromDB is null)
+                return null;
+            appointmentFromDB.IsConfirmed = !appointmentFromDB.IsConfirmed;
+            await _db.SaveChangesAsync();
+            return appointmentFromDB;
         }
         public async Task<int>CreateAppointmentAsync(Appointment newAppointment,List<Product>listOfProducts)
         {
@@ -81,22 +89,20 @@ namespace BlazorStore.Data.Services
 
             return newAppointment.Id;
         }
+       
         public async Task<int> UpdateAppointmentAsync(Appointment appointmentForUpdate)
         {
             if (appointmentForUpdate == null)
                 return 0;
-            Appointment appointmentFromDB = await _db.Appointments.FirstOrDefaultAsync(x=>x.Id==appointmentForUpdate.Id);
-            if (appointmentFromDB == null)
-                return 0;
+            //Appointment appointmentFromDB = await _db.Appointments.FirstOrDefaultAsync(x=>x.Id==appointmentForUpdate.Id);
+            //if (appointmentFromDB == null)
+            //    return 0;
             _db.Update(appointmentForUpdate);
             await _db.SaveChangesAsync();
 
             return appointmentForUpdate.Id;
         }
-        //public async Task<bool>ConfirmAppointmentAsync(Appointment appointmentForConfirmation)
-        //{
-            
-        //}
+       
         public async Task<bool>DeleteAppointmentAsync(Appointment appointmentForDeletion)
         {
             if (appointmentForDeletion == null)

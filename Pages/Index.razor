@@ -18,26 +18,26 @@
                 <div class="card mr-3 mb-3">
                     @if (item.Image is not null)
                     {
-                        <img src="@ImageToDisplayConverter(item.Image)" class="card-img-top" height="300" width="200" alt="@item.Name picture">
+                        <img src="@ToDisplayExtension.ImageToDisplayConverter(item.Image)" class="card-img-top" height="300" width="200" alt="@item.Name picture">
                     }
                     else
                     {
                         <img src="https://st4.depositphotos.com/1028437/21297/v/600/depositphotos_212975764-stock-illustration-image-available-sign.jpg" class="card-img-top" height="200" width="200" alt="@item.Name picture">
                     }
-                    <div class="card-body">
-                        <h5 class="card-title">@item.Name</h5>
+                    <div class="card-body">                       
+                        <h5 class="card-title text-center">@item.Name</h5>
                     </div>
                     <div class="card-footer">
                         <div class="row">
-                            <div class="col-7 text-left">
-                                <span class="text-primary">
+                            <div class="col-12 text-center">
+                                <span class="text-primary font-weight-bold">
                                     @string.Format("{0:C}", item.Price)
-                                </span>
-                            </div>
-                            <div class="col col-sm-12 col-md-12 text-right">
-                                <a class="btn btn-success" href="/details/@item.Id">Details</a>
-                            </div>
-                        </div>
+                                </span>                            
+                            </div>                         
+                                <div class="col-12 text-center my-3">
+                                    <a class="btn btn-success form-control" href="/details/@item.Id">Details</a>
+                                </div>                       
+                        </div>                     
                     </div>
                 </div>
             </div>
@@ -60,13 +60,13 @@
     {
         listOfProducts = await _db.GetAllProductsAsync();
     }
-    string ImageToDisplayConverter(byte[] image)// Метод преобразования массива байтов обратно в картинку
-    {
-        if (image is null)
-            return "";
-        var base64 = Convert.ToBase64String(image);
-        var finalString = string.Format("data:image/jpg;base64,{0}", base64);
+    //string ImageToDisplayConverter(byte[] image)// Метод преобразования массива байтов обратно в картинку
+    //{
+    //    if (image is null)
+    //        return "";
+    //    var base64 = Convert.ToBase64String(image);
+    //    var finalString = string.Format("data:image/jpg;base64,{0}", base64);
 
-        return finalString;
-    }
+    //    return finalString;
+    //}
 }

@@ -15,20 +15,22 @@ namespace BlazorStore.Merchant
     public class PayPalAPI
     {
         public IConfiguration configuration { get; }
+
         public PayPalAPI(IConfiguration _configuration)
         {
             configuration = _configuration;
         }
-        public async Task<string> getRedirectUrlToPayPalAsync(double total, string currency,int appointmentId)
+
+        public async Task<string> getRedirectUrlToPayPalAsync(double total, string currency, int appointmentId)
         {
             try
             {
-                return  Task.Run(async () =>
-                {
-                    HttpClient http = GetPayPalHttpClient();
-                    PaypalAccessToken accessToken = await GetPayPalAccessTokenAsync(http);
-                    PayPalRequest createdPayment = await CreatePaymentAsync(http, accessToken, total, currency,appointmentId);
-                    return createdPayment.links.First(x => x.rel == "approval_url").href; // Обращение к созданному заказу, массив Link, получаем link, если содержит approval url 
+                return Task.Run(async () =>
+               {
+                   HttpClient http = GetPayPalHttpClient();
+                   PaypalAccessToken accessToken = await GetPayPalAccessTokenAsync(http);
+                   PayPalRequest createdPayment = await CreatePaymentAsync(http, accessToken, total, currency, appointmentId);
+                   return createdPayment.links.First(x => x.rel == "approval_url").href; // Обращение к созданному заказу, массив Link, получаем link, если содержит approval url
                 }).Result;
             }
             catch (Exception ex)
@@ -37,6 +39,7 @@ namespace BlazorStore.Merchant
                 return null;
             }
         }
+
         public async Task<PayPalResponse> executedPayment(string paymentId, string payerId)
         {
             try
@@ -51,7 +54,8 @@ namespace BlazorStore.Merchant
                 return null;
             }
         }
-        HttpClient GetPayPalHttpClient()
+
+        private HttpClient GetPayPalHttpClient()
         {
             //Получаем конфигурацию API url PayPal из appsettings.json
             var payPalConfig = configuration["PayPal:urlAPI"];
@@ -62,10 +66,11 @@ namespace BlazorStore.Merchant
             };
             return http;
         }
-        async Task<PaypalAccessToken> GetPayPalAccessTokenAsync(HttpClient http)
+
+        private async Task<PaypalAccessToken> GetPayPalAccessTokenAsync(HttpClient http)
         {
             byte[] bytes = Encoding.GetEncoding("iso-8859-1").GetBytes($"{configuration["PayPal:clientId"]}:{configuration["PayPal:secret"]}");// закодированный массив байтов
-            HttpRequestMessage request = new(HttpMethod.Post,"/v1/oauth2/token");
+            HttpRequestMessage request = new(HttpMethod.Post, "/v1/oauth2/token");
             request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(bytes));//добавление авторизационных заголовков
             var form = new Dictionary<string, string>
             {
@@ -79,10 +84,11 @@ namespace BlazorStore.Merchant
 
             return accessToken;
         }
-        async Task<PayPalRequest> CreatePaymentAsync(HttpClient http,PaypalAccessToken accessToken, double total,string currency,int appointmentId)
+
+        private async Task<PayPalRequest> CreatePaymentAsync(HttpClient http, PaypalAccessToken accessToken, double total, string currency, int appointmentId)
         {
             HttpRequestMessage request = new(HttpMethod.Post, "/v1/payments/payment");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer",accessToken.access_token);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.access_token);
             JObject payment = JObject.FromObject(new
             {
                 intent = "sale",
@@ -97,25 +103,25 @@ namespace BlazorStore.Merchant
                    new
                    {
                        amount=new
-                       { 
+                       {
                            total=total,
                            currency=currency
                        },
                        description = appointmentId.ToString()
                    }
-                   
                 })
             });
-            request.Content = new StringContent(JsonConvert.SerializeObject(payment),Encoding.UTF8,"application/json");
+            request.Content = new StringContent(JsonConvert.SerializeObject(payment), Encoding.UTF8, "application/json");
             HttpResponseMessage response = await http.SendAsync(request);
             var content = await response.Content.ReadAsStringAsync();
             PayPalRequest createdPayPalPayment = JsonConvert.DeserializeObject<PayPalRequest>(content);
             return createdPayPalPayment;
         }
-        async Task<PayPalResponse> ExecutePayPalPaymentAsync(HttpClient http, PaypalAccessToken accessToken,string paymentId,string payerId)
+
+        private async Task<PayPalResponse> ExecutePayPalPaymentAsync(HttpClient http, PaypalAccessToken accessToken, string paymentId, string payerId)
         {
-            HttpRequestMessage request = new(HttpMethod.Post,$"v1/payments/payment/{paymentId}/execute");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer",accessToken.access_token);
+            HttpRequestMessage request = new(HttpMethod.Post, $"v1/payments/payment/{paymentId}/execute");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.access_token);
             JObject payment = JObject.FromObject(new
             {
                 payer_id = payerId
@@ -126,7 +132,6 @@ namespace BlazorStore.Merchant
             PayPalResponse executedPayment = JsonConvert.DeserializeObject<PayPalResponse>(content);
 
             return executedPayment;
-
         }
     }
 }

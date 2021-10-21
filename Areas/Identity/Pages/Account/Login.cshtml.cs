@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using BlazorStore.Data.Services;
 
 namespace BlazorStore.Areas.Identity.Pages.Account
 {
@@ -20,14 +21,17 @@ namespace BlazorStore.Areas.Identity.Pages.Account
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly AccountService _accountService;
 
-        public LoginModel(SignInManager<IdentityUser> signInManager, 
+        public LoginModel(SignInManager<IdentityUser> signInManager,
             ILogger<LoginModel> logger,
-            UserManager<IdentityUser> userManager)
+            UserManager<IdentityUser> userManager,
+            AccountService accountService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _accountService = accountService;
         }
 
         [BindProperty]
@@ -76,24 +80,47 @@ namespace BlazorStore.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-        
+
             if (ModelState.IsValid)
             {
+                string userIP = _accountService.GetUserIPOrNull();
+                string userMAC = _accountService.GetUserMACOrNull();
+                var checkIpResult = await _accountService.AddressIsLocked(userIP, true);
+                //var checkMacResult = await _accountService.AddressIsLocked(userMAC, false);
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                if (checkIpResult)
+                {
+                    ModelState.AddModelError("","Ip is banned!");
+                    return Page();
+                }              
+                if (await _accountService.AddressIsLocked(userMAC, false))
+                {
+                    ModelState.AddModelError("","Mac is banned!");
+                    return Page();
+                }
+                //if (string.IsNullOrWhiteSpace(userIP) || string.IsNullOrWhiteSpace(userMAC))
+                //{
+                //    ModelState.AddModelError("","Ip or Mac does not exist");
+                //    return Page();
+                //}
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe,  lockoutOnFailure: false);               
+               
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
                     return LocalRedirect(returnUrl);
                 }
+
+               
                 if (result.RequiresTwoFactor)
                 {
                     return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
                 }
+               
                 if (result.IsLockedOut)
-                {
-                    _logger.LogWarning("User account locked out.");
+                {                   
+                    _logger.LogWarning("User account is banned.");
                     return RedirectToPage("./Lockout");
                 }
                 else

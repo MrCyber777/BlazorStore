@@ -1,0 +1,120 @@
+﻿@page "/users"
+@using Microsoft.AspNetCore.Identity;
+@inject AccountService _db
+
+<div class="container-fluid p-4">
+    <div class="row justify-content-between text-center">
+        <div class="col-sm-12 col-md-12">
+            <h1 class="text-info">Users</h1>
+        </div>
+        @*
+            <div class="col-sm-12 col-md-3 text-right">
+                @*// TODO: Search Field and input
+            </div>
+        *@
+
+    </div>
+    @if (users is null)
+    {
+        <div class="row">
+            <div class="col text-center">
+                <img src="https://media2.giphy.com/media/3oEjI6SIIHBdRxXI40/200.gif" height="200" />
+            </div>
+        </div>
+    }
+    else if (users.Any())
+    {
+        <div class="row">
+
+            <table class="table table-striped">
+                <thead class="bg-info">
+                    <tr>
+                        <th>User Id</th>
+                        <th>User Email</th>
+                        <th>IP</th>
+                        <th>Mac</th>
+                        <th>IsBanned</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in users)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.Email</td>
+                            @if (item is ApplicationUser)
+                            {
+                                var appUser = item as ApplicationUser;
+                                <td>@appUser.IP</td>
+                                <td>@appUser.Mac</td>
+                            }
+                            else
+                            {
+                                <td></td>
+                                <td></td>
+                            }
+                            <td>@item.LockoutEnd</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-warning" @onclick="()=>BanUser(item.Id,false)">Ban MAC</button>
+                                    <button type="button" class="btn btn-danger" @onclick="()=>BanUser(item.Id,true)">Ban IP</button>
+                                </div>
+                            </td>
+                            @*//TODO*@
+                        </tr>
+
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            Users Count: @users.Count
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col text-center">
+                <img src="https://cdn.dribbble.com/users/1231865/screenshots/11157048/media/bc9427646c632ded563ee076fdc5dfda.jpg?compress=1&resize=400x300" height="200" />
+            </div>
+        </div>
+    }
+    @*@if (showModal)
+        {
+            if (isDetails)
+            {
+                <DetailsModalAppointment appointmentObj="appointmentObj" OnCloseModal="CloseModal" />
+            }
+            else
+            {
+                <AddEditModalAppointment appointmentObj="appointmentObj" OnCloseModal="CloseModal" OnValidSubmitHandler="ValidSubmitHandler" />
+            }
+        }*@
+</div>
+
+@code
+{
+    List<IdentityUser> users;
+   
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await _db.GetAllUsersAsync();
+    }
+    async Task BanUser(string id, bool isIp)
+    {
+        await _db.BanByIpOrMac(id, isIp);        
+    }
+}
+

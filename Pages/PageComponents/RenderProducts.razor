@@ -18,15 +18,14 @@
                         <div class="col">
                             @Header
                         </div>
-                    </div>                  
-                        @foreach (var item in Items)
-                        {
-                            @ChildContent(item)
-                        }                 
+                    </div>
+                    @foreach (var item in Items)
+                    {
+                        @ChildContent(item)
+                    }
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="ShowCloseModal">Close</button>
                     </div>
-
                 </div>
             </div>
         </div>

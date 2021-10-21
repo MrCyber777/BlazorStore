@@ -1,0 +1,185 @@
+﻿@page "/roles"
+@using Microsoft.AspNetCore.Identity;
+@inject RoleManagerService _db
+@inject UserManager<IdentityUser> _userManager
+<div class="container-fluid p-4">
+    <div class="row justify-content-between border border-info">
+        <div class="col-sm-12 col-md-5">
+            <h1 class="text-info">Roles</h1>
+        </div>
+        <div class="col-sm-12 col-md-3 text-right">
+            <button type="button" class="btn btn-info form-control my-2" @onclick="ShowCloseModal">Add a new role</button>
+        </div>
+    </div>
+    @if (roles is null)
+    {
+        <div class="row">
+            <div class="col text-center">
+                <img src="https://media2.giphy.com/media/3oEjI6SIIHBdRxXI40/200.gif" height="200" />
+            </div>
+        </div>
+    }
+    else if (roles.Any())
+    {
+        <div class="row">
+            <table class="table table-striped">
+                <thead class="bg-info">
+                    <tr>
+                        <th>Roles:</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in roles)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td class="text-right">
+                                <button class="btn btn-primary" type="button" @onclick="()=>ShowCloseModal(item.Name)">Update</button>
+                                <button class="btn btn-danger" type="button" @onclick="(()=>DeleteRoleHandler(item.Name))">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td>
+                            Users Count: @roles.Count
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        @if (listOfUsers.Any())
+        {
+            <div class="row">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Id:</th>
+                            <th>Email:</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in listOfUsers)
+                        {
+                            <tr>
+                                <td>@user.Id</td>
+                                <td>@user.Email</td>
+                                <td>
+                                    <select class="form-control"@onchange="((x) => SelectionRoleChange(x, user.Id))">
+                                        @foreach (var role in roles)
+                                        {
+                                            <option value="@role.Id" selected="@(IsInRole(user.Id, role.Id))">@role.Name</option>
+                                        }
+                                    </select>
+                                </td>
+                                @*<td class="text-right">
+                                        <button class="btn btn-primary" type="button" @onclick="ShowCloseModal">Update</button>
+                                        <button class="btn btn-danger" type="button" @onclick="(()=>DeleteRoleHandler(item.Name))">Delete</button>
+                                    </td>*@
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="row">
+            <div class="col text-center">
+                <img src="https://cdn.dribbble.com/users/1231865/screenshots/11157048/media/bc9427646c632ded563ee076fdc5dfda.jpg?compress=1&resize=400x300" height="200" />
+            </div>
+        </div>
+    }
+</div>
+@if (showModal)
+{
+    <AddEditRoleModal RoleName="@roleName" OnValidSubmitHandler="ValidSubmitHandler" OnCloseModal="ShowCloseModal" />
+}
+
+@code {
+    List<IdentityRole> roles;
+    List<IdentityUser> listOfUsers;
+    Dictionary<string, string> userAndRole = new Dictionary<string, string>();
+    bool showModal = false;
+    bool isDetails;
+    string roleName;
+    string userName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        roles = await _db.GetAllRolesAsync();
+        listOfUsers = await _db.GetAllUserRolesAsync();
+
+        IdentityUser user;
+        string userId, roleName, roleId;
+        for (int i = 0; i < listOfUsers.Count(); i++)
+        {
+            user = listOfUsers[i];
+            var role = await _userManager.GetRolesAsync(user);
+            userId = user.Id;
+            roleName = role[0];
+            roleId = roles.FirstOrDefault(x => x.Name == roleName).Id;
+            userAndRole.Add(userId, roleId);
+
+        }
+    }
+
+    void ShowCloseModal()
+    {
+
+        showModal = !showModal;
+    }
+    void ShowCloseModal(string role)
+    {
+        roleName = role;
+        showModal = !showModal;
+    }
+    async Task SelectionRoleChange(ChangeEventArgs args, string userId)
+    {
+        var newRole = roles.FirstOrDefault(x => x.Id == args.Value.ToString());
+        await _db.EditUserRoleAsync(userId, newRole.Name);
+    }
+
+    async Task ValidSubmitHandler(string roleName)
+    {
+        bool result = false;
+        showModal = false;
+
+        result = await _db.CreateUpdateRoleAsync(roleName);
+
+        roles = await _db.GetAllRolesAsync();
+    }
+    async Task ValidSubmitUserRoleHandler(string name, string roleName)
+    {
+        bool result = false;
+        showModal = false;
+
+        result = await _db.EditUserRoleAsync(name, roleName);
+
+        listOfUsers = await _db.GetAllUserRolesAsync();
+    }
+    async Task DeleteUserRoleHandler(string name, string roleName)
+    {
+        bool result = false;
+        result = await _db.EditUserRoleAsync(name, roleName);
+        listOfUsers = await _db.GetAllUserRolesAsync();
+    }
+    async Task DeleteRoleHandler(string roleName)
+    {
+        bool result = false;
+        result = await _db.DeleteRoleAsync(roleName);
+        roles.Clear();
+        roles = await _db.GetAllRolesAsync();
+    }
+
+    bool IsInRole(string userId, string roleId)
+    {
+        var userRole = userAndRole.FirstOrDefault(x => x.Key == userId);
+        return (userRole.Value == roleId) ? true : false;
+    }
+}

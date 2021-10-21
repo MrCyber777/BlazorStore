@@ -25,7 +25,6 @@
                                 </div>
                             </div>
 
-                          
                             <div class="row form-group">
                                 <div class="col-4">Email</div>
                                 <div class="col-8">
@@ -40,17 +39,15 @@
                                     @*<ValidationMessage For="(() =>AppointmentDetails.CustomerEmail)" />*@
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
                     <div class="modal-footer">
 
                         <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="OnCancel">Close</button>
-                        <button type="submit" class="btn btn-primary"@onclick="OnValidSubmitHandler">Save changes</button>
+                        <button type="submit" class="btn btn-primary" @onclick="OnValidSubmitHandler">Save changes</button>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -66,7 +63,6 @@
     Appointment appointmentObj = new();
     ModalStateEnum modalState = new();
     EditAppointmentModal modal;
-
 
     [Parameter] public Appointment AppointmentDetails { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
@@ -112,6 +108,5 @@
     //    // 4. Обновить список всех категорий
     //    categories = await _db.GetAllCategoriesAsync();
     //}
-
 
 }

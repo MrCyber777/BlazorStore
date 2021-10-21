@@ -1,5 +1,4 @@
-﻿
-using BlazorStore.Data.Models;
+﻿using BlazorStore.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,20 +8,24 @@ namespace BlazorStore.Data.Services
     public class SpecialTagService
     {
         private readonly ApplicationDbContext _db;
+
         public SpecialTagService(ApplicationDbContext db)
         {
             _db = db;
         }
+
         public async Task<SpecialTag> GetSingleSpecialTagAsync(int id)
         {
             SpecialTag specialTagFromDB = await _db.SpecialTags.FindAsync(id);
             return specialTagFromDB;
         }
+
         public async Task<List<SpecialTag>> GetAllSpecialTagsAsync()
         {
             List<SpecialTag> allSpecialTags = await _db.SpecialTags.ToListAsync();
             return allSpecialTags;
         }
+
         public async Task<bool> CreateSpecialTagAsync(SpecialTag newSpecialTag)
         {
             if (newSpecialTag == null)
@@ -32,6 +35,7 @@ namespace BlazorStore.Data.Services
 
             return true;
         }
+
         public async Task<bool> UpdateSpecialTagAsync(SpecialTag specialTagForUpdate)
         {
             if (specialTagForUpdate == null)
@@ -44,6 +48,7 @@ namespace BlazorStore.Data.Services
 
             return true;
         }
+
         public async Task<bool> DeleteSpecialTagAsync(SpecialTag specialTagForDeletion)
         {
             if (specialTagForDeletion == null)
@@ -55,6 +60,6 @@ namespace BlazorStore.Data.Services
             await _db.SaveChangesAsync();
 
             return true;
-        }     
+        }
     }
 }

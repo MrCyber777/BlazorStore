@@ -9,6 +9,7 @@
 @inject UserManager<IdentityUser> _userManager
 @inject IEmailSender _emailSender
 @inject RoleManager<IdentityRole> _roleManager
+@inject AccountService _accountService
 
 <div class="p-4 row">
     <EditForm Model="registerInputModel" OnValidSubmit="ValidSubmitHandler">
@@ -27,7 +28,11 @@
                         </div>
                     }
                 }
-            </div>
+                @if (!string.IsNullOrWhiteSpace(message))
+                {
+                    <div class="alert alert-danger">@message</div> 
+                }
+            </div>           
         </div>
         <div class="row">
             <div class="col-sm-7 col-md-7 col-lg-3">
@@ -53,8 +58,6 @@
                 </div>
             </div>
 
-
-
             <div class="col-sm-7 col-md-7 col-lg-3">
                 <div class="form-group">
                     <label>Address</label>
@@ -62,8 +65,6 @@
                     <ValidationMessage For="()=>registerInputModel.Address" class="text-danger" />
                 </div>
             </div>
-
-
 
             <div class="col-sm-7 col-md-7 col-lg-3">
                 <div class="form-group">
@@ -73,7 +74,6 @@
                 </div>
             </div>
 
-
             <div class="col-sm-7 col-md-7 col-lg-3">
                 <div class="form-group">
                     <label>ZIP</label>
@@ -81,7 +81,6 @@
                     <ValidationMessage For="()=>registerInputModel.Zip" class="text-danger" />
                 </div>
             </div>
-
 
             <div class="col-sm-7 col-md-7 col-lg-3">
                 <div class="form-group">
@@ -91,7 +90,6 @@
                 </div>
             </div>
 
-
             <div class="col-sm-7 col-md-7 col-lg-3">
                 <div class="form-group">
                     <label>Password</label>
@@ -99,7 +97,6 @@
                     <ValidationMessage For="()=>registerInputModel.Password" class="text-danger" />
                 </div>
             </div>
-
 
             <div class="col-sm-7 col-md-7 col-lg-3">
                 <div class="form-group">
@@ -113,20 +110,37 @@
         <button type="submit" class="btn btn-primary">Register</button>
     </EditForm>
 </div>
-    
-    <div class="col-md-6 col-md-offset-2">
 
-    </div>
-
+<div class="col-md-6 col-md-offset-2">
+</div>
 
 @code
 {
     RegisterInputModel registerInputModel = new();
     IdentityResult identityResult;
-
+    string message;
     async Task ValidSubmitHandler()
     {
-        var user = new ApplicationUser { UserName = registerInputModel.Email, Email = registerInputModel.Email, FirstName = registerInputModel.FirstName, LastName = registerInputModel.LastName, Address = registerInputModel.Address, City = registerInputModel.City, Zip = registerInputModel.Zip, Country = registerInputModel.Country };
+        string userIP = _accountService.GetUserIPOrNull();
+        string userMAC = _accountService.GetUserMACOrNull();
+        var checkIpResult = await _accountService.AddressIsLocked(userIP, true);
+        if (checkIpResult)
+        {
+            message = "Ip is banned!";
+            return;
+        }
+        if (await _accountService.AddressIsLocked(userMAC, false))
+        {
+            message = "Mac is banned!";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(userIP) || string.IsNullOrWhiteSpace(userMAC))
+        {
+            message = "Ip or Mac does not exist";
+            return;
+        }
+
+        var user = new ApplicationUser { IP = userIP, Mac = userMAC, UserName = registerInputModel.Email, Email = registerInputModel.Email, FirstName = registerInputModel.FirstName, LastName = registerInputModel.LastName, Address = registerInputModel.Address, City = registerInputModel.City, Zip = registerInputModel.Zip, Country = registerInputModel.Country };
         var result = await _userManager.CreateAsync(user, registerInputModel.Password);
 
         if (result.Succeeded)

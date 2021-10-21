@@ -32,7 +32,7 @@
                 <div class="table-responsive">
                     <table class="table table-striped border">
                         <thead class="bg-info">
-                            <tr>
+                            <tr class="text-center">
                                 <th></th>
                                 <th>Name</th>
                                 <th>Category</th>
@@ -44,15 +44,15 @@
                         <tbody>
                             @foreach (var item in listOfProducts)
                             {
-                            <tr>
+                                <tr class="text-center">
 
-                                <td><img class="image-fluid img-thumbnail" src="@ToDisplayExtension.ImageToDisplayConverter(item.Image)" height="100" width="150" /></td>
-                                <td>@item.Name</td>
-                                <td>@item.Category.Name</td>
-                                <td>@item.Quantity</td>
-                                <td>@string.Format("{0:C}", item.Price)</td>
-                                <td><button class="btn btn-danger" @onclick="()=>Remove(item.Id)">Remove</button></td>
-                            </tr>
+                                    <td><img class="image-fluid img-thumbnail" src="@ToDisplayExtension.ImageToDisplayConverter(item.Image)" height="100" width="150" /></td>
+                                    <td class="align-middle">@item.Name</td>
+                                    <td class="align-middle">@item.Category.Name</td>
+                                    <td class="align-middle">@item.Quantity</td>
+                                    <td class="align-middle">@string.Format("{0:C}", item.Price)</td>
+                                    <td class="align-middle"><button class="btn btn-danger" @onclick="()=>Remove(item.Id)">Remove</button></td>
+                                </tr>
 
                             }
                         </tbody>
@@ -66,7 +66,6 @@
                         <div class="font-weight-bold text-info text-right">Total price:@string.Format("{0:C}", totalPrice)</div>
                     </div>
                 </div>
-
             </div>
         </div>
     }
@@ -75,13 +74,7 @@
     {
         <AppointmentComponent Appointment="appointmentObj" Products="listOfProducts" OnClose="MakeAppointment" />
     }
-   
-
 </div>
-
-   
-   
-
 
 @code
 {
@@ -92,7 +85,6 @@
     Product productObj = new();
     double totalPrice = 0;
     bool makeAppointment = false;
-
 
     protected override async Task OnAfterRenderAsync(bool firstRender)// Срабатывает после первой отрисовки компонента
     {
@@ -107,10 +99,9 @@
     async Task Remove(int id)
     {
         listOfShoppingCart.Remove(id);
-        await _protectedLocalStorage.SetForSession(SD.SessionKey,listOfShoppingCart);
+        await _protectedLocalStorage.SetForSession(SD.SessionKey, listOfShoppingCart);
         await DataInit();
     }
-
 
     async Task DataInit()
     {
@@ -121,6 +112,9 @@
 
         // 2. Получаем и сохраняем все ID товаров в локальную переменную
         listOfShoppingCart = await _protectedLocalStorage.GetFromSession<List<int>>(SD.SessionKey);
+        ShoppingCartDTO shoppingCartDTO = new();
+        shoppingCartDTO.ListOfProducts = await _db.ShoppingCart(listOfShoppingCart,listOfProducts);
+
 
         // 3. По полученным ID заполнить (получить) все продукты и сохранить их в переменную
         if (listOfShoppingCart is not null && listOfShoppingCart.Any())
@@ -142,7 +136,7 @@
             {
                 listOfProducts.ForEach(x =>
                 {
-                    totalPrice+= x.Price * x.Quantity;
+                    totalPrice += x.Price * x.Quantity;
                 });
             }
         }

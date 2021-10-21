@@ -1,5 +1,4 @@
-﻿
-@page "/confirm/{AppointmentId}"
+﻿@page "/confirm/{AppointmentId}"
 @using BlazorStore.Merchant
 @using Microsoft.Extensions.Configuration
 @using System.Globalization
@@ -7,9 +6,8 @@
 @inject AppointmentService _db
 @inject ProductService _productDB
 @inject ProtectedLocalStorage _protectedLocalStorage
-@inject NavigationManager _nav 
+@inject NavigationManager _nav
 @inject IJSRuntime _js
-
 
 @if (currentAppointment is not null)
 {
@@ -126,12 +124,12 @@
     </div>
     <div class="row">
         <div class="col">
-         <EditForm Model="currentAppointment" OnValidSubmit="ValidSubmitAsync">
-             <button type="submit" class="btn btn-success">Pay</button>
-         </EditForm>
+            <EditForm Model="currentAppointment" OnValidSubmit="ValidSubmitAsync">
+                <button type="submit" class="btn btn-success">Pay</button>
+            </EditForm>
         </div>
     </div>
-  
+
 }
 else
 {
@@ -144,7 +142,6 @@ else
 @*
     TODO Внедрить скрытую форму  PayPal. Внедрить все настройки PayPal. Кнопка Pay должна принадлежать скрытой форме Paypal. Сформировать товары для этой формы.
 *@
-
 
 @code
 {
@@ -164,13 +161,13 @@ else
 
         currentAppointment = await _db.GetSingleAppointmentAsync(appointmentId);
     }
-    protected override  async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await DataInit();
             var paypalAPI = new PayPalAPI(_configuration);
-            var stringPrice = totalPrice.ToString("#.##",CultureInfo.InvariantCulture);
+            var stringPrice = totalPrice.ToString("#.##", CultureInfo.InvariantCulture);
             var resultPrice = double.Parse(stringPrice, CultureInfo.InvariantCulture);
             url = await paypalAPI.getRedirectUrlToPayPalAsync(resultPrice, "USD", appointmentId);
             StateHasChanged();
@@ -214,7 +211,7 @@ else
     }
     async Task ValidSubmitAsync()
     {
-        await _js.InvokeVoidAsync("RedirectTo",url);
+        await _js.InvokeVoidAsync("RedirectTo", url);
     }
 
 }

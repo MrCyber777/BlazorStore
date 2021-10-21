@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlazorStore.Merchant
 {
@@ -22,6 +19,7 @@ namespace BlazorStore.Merchant
             public string status { get; set; }
             public Payer_Info payer_info { get; set; }
         }
+
         public class Payer_Info
         {
             public string payer_id { get; set; }
@@ -32,6 +30,7 @@ namespace BlazorStore.Merchant
             public string country_code { get; set; }
             public Billing_Address billing_address { get; set; }
         }
+
         public class Shipping_Address
         {
             public string recipient_name { get; set; }
@@ -39,8 +38,9 @@ namespace BlazorStore.Merchant
             public string city { get; set; }
             public string state { get; set; }
             public string postal_code { get; set; }
-            public string country_code { get; set; }           
+            public string country_code { get; set; }
         }
+
         public class Billing_Address
         {
             public string line1 { get; set; }
@@ -50,6 +50,7 @@ namespace BlazorStore.Merchant
             public string postal_code { get; set; }
             public string country_code { get; set; }
         }
+
         public class Transaction
         {
             public Amount amount { get; set; }
@@ -58,25 +59,30 @@ namespace BlazorStore.Merchant
             public Related_Resources[] related_resources { get; set; }
             public string description { get; set; }
         }
+
         public class Amount
         {
             public string total { get; set; }
             public string currency { get; set; }
             public Details details { get; set; }
         }
+
         public class Details
         {
             public string subtotal { get; set; }
         }
+
         public class Payee
         {
             public string merchant_id { get; set; }
             public string email { get; set; }
         }
+
         public class Item_List
         {
             public Shipping_Address1 shipping_address { get; set; }
         }
+
         public class Shipping_Address1
         {
             public string recipient_name { get; set; }
@@ -86,10 +92,12 @@ namespace BlazorStore.Merchant
             public string postal_code { get; set; }
             public string country_code { get; set; }
         }
+
         public class Related_Resources
         {
             public Sale sale { get; set; }
         }
+
         public class Sale
         {
             public string id { get; set; }
@@ -104,11 +112,13 @@ namespace BlazorStore.Merchant
             public DateTime update_time { get; set; }
             public Link[] links { get; set; }
         }
+
         public class Transaction_Fee
         {
             public string value { get; set; }
             public string currency { get; set; }
         }
+
         public class Link
         {
             public string href { get; set; }

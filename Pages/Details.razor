@@ -2,18 +2,18 @@
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject ProductService _db
 @inject ProtectedLocalStorage _protectedLocalStorage
-@if(currentProduct is null)
-            {
-                <div class="row">
-                    <div class="col text-center">
-                        <img src="https://media4.giphy.com/media/3oEjI6SIIHBdRxXI40/200w.gif?cid=82a1493bg0nn71x3sx1kequ828lbtngocikpzj86t8xmhc10&rid=200w.gif&ct=g" height="200"/>
-                    </div>
-                </div>
-            }
+@if (currentProduct is null)
+{
+    <div class="row">
+        <div class="col text-center">
+            <img src="https://media4.giphy.com/media/3oEjI6SIIHBdRxXI40/200w.gif?cid=82a1493bg0nn71x3sx1kequ828lbtngocikpzj86t8xmhc10&rid=200w.gif&ct=g" height="200" />
+        </div>
+    </div>
+}
 else
-            {
-              <DetailsComponent OnAddToCart="AddToCart" productObj="currentProduct"/>
-            }
+{
+    <DetailsComponent OnAddToCart="AddToCart" productObj="currentProduct" />
+}
 @code {
     [Parameter] public int ProductId { get; set; }
 
@@ -42,6 +42,5 @@ else
         // 5. Оповестить Blazor о обновлении данных явно
         StateHasChanged();
     }
-
 
 }

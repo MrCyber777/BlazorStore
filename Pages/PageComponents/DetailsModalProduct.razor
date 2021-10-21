@@ -1,66 +1,60 @@
 ﻿@if (displayProductDetails)
 {
-<div class="container-fluid p-4">   
-    <div class="modal-backdrop show"></div>
-    <div class="modal" tabindex="-1" style="display:block;">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title  text-info">Products Info</h4>
-                    <br />
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="OnCancel">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-
-                    <div class="row">
-                        <table class=" table table-striped">
-                            <thead class="bg-info text-center">
-                                <tr>
-                                    <th>Image</th>
-                                    <th>Product Name</th>
-                                    <th>Quantity</th>
-                                    <th>ShadeColor</th>                                  
-                                </tr>
-                                <br />
-                            </thead>
-                           
-                            <tbody>
-                                <tr class="text-center">
-                                    @if (ProductDetails.Image is not null)
-                                    {
-                                        <td>@ImageToDisplayConverter(ProductDetails.Image)</td>
-                                        <br />
-                                    }
-                                    else
-                                    {
-                                        <td>
-                                            <img src="https://st4.depositphotos.com/1028437/21297/v/600/depositphotos_212975764-stock-illustration-image-available-sign.jpg" width="100" />
-                                        </td>
-
-                                    }
-                                    <td>@ProductDetails.Name</td>
-                                    <td>@ProductDetails.Quantity</td>
-                                    <td>@ProductDetails.ShadeColor</td>
-                                </tr>
-                            </tbody>
-                           
-                        </table>
-                       
-                      
-
+    <div class="container-fluid p-4">
+        <div class="modal-backdrop show"></div>
+        <div class="modal" tabindex="-1" style="display:block;">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title  text-info">Products Info</h4>
+                        <br />
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="OnCancel">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="OnCancel">Close</button>
-                    </div>               
+                    <div class="modal-body">
 
-                </div>               
+                        <div class="row">
+                            <table class=" table table-striped">
+                                <thead class="bg-info text-center">
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Product Name</th>
+                                        <th>Quantity</th>
+                                        <th>ShadeColor</th>
+                                    </tr>
+                                    <br />
+                                </thead>
+
+                                <tbody>
+                                    <tr class="text-center">
+                                        @if (ProductDetails.Image is not null)
+                                        {
+                                            <td>@ToDisplayExtension.ImageToDisplayConverter(ProductDetails.Image)</td>
+                                            <br />
+                                        }
+                                        else
+                                        {
+                                            <td>
+                                                <img src="https://st4.depositphotos.com/1028437/21297/v/600/depositphotos_212975764-stock-illustration-image-available-sign.jpg" width="100" />
+                                            </td>
+
+                                        }
+                                        <td>@ProductDetails.Name</td>
+                                        <td>@ProductDetails.Quantity</td>
+                                        <td>@ProductDetails.ShadeColor</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="OnCancel">Close</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
-</div>
 }
 
 @code {
@@ -73,7 +67,6 @@
     [Parameter] public Product ProductDetails { get; set; }
 
     [Parameter] public EventCallback OnCancel { get; set; }
-
 
     public void Show(ModalStateEnum _actionStatus)
     {
@@ -90,13 +83,13 @@
     }
     public void Hide() => displayProductDetails = false;
 
-    string ImageToDisplayConverter(byte[] image)// Метод преобразования массива байтов обратно в картинку
-    {
-        if (image is null)
-            return "";
-        var base64 = Convert.ToBase64String(image);
-        var finalString = string.Format("data:image/jpg;base64,{0}", base64);
+    //string ImageToDisplayConverter(byte[] image)// Метод преобразования массива байтов обратно в картинку
+    //{
+    //    if (image is null)
+    //        return "";
+    //    var base64 = Convert.ToBase64String(image);
+    //    var finalString = string.Format("data:image/jpg;base64,{0}", base64);
 
-        return finalString;
-    }
+    //    return finalString;
+    //}
 }

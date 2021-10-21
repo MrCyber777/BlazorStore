@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
-using BlazorStore.Data.Models;
+﻿using BlazorStore.Data.Models;
 using BlazorStore.Utility;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 
 namespace BlazorStore.Areas.Identity.Pages.Account
 {
@@ -58,6 +56,7 @@ namespace BlazorStore.Areas.Identity.Pages.Account
             [Required(ErrorMessage = "Please enter a name")]
             [MaxLength(50), MinLength(2)]
             public string FirstName { get; set; }
+
             [Required(ErrorMessage = "Please enter a surname")]
             [MaxLength(50), MinLength(2)]
             public string LastName { get; set; }
@@ -71,7 +70,6 @@ namespace BlazorStore.Areas.Identity.Pages.Account
             //[Required(ErrorMessage = "Please enter a country name"), MaxLength(50), MinLength(2)]
             //public string Country { get; set; }
 
-
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
@@ -82,10 +80,9 @@ namespace BlazorStore.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
             [Display(Name = "Super admin")]
             public bool IsSuperAdmin { get; set; }
-
-           
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -100,18 +97,17 @@ namespace BlazorStore.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new AdminUser { UserName = Input.Email, Email = Input.Email, FirstName=Input.FirstName,LastName=Input.LastName };
+                var user = new AdminUser { UserName = Input.Email, Email = Input.Email, FirstName = Input.FirstName, LastName = Input.LastName };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
-                    if(!await _roleManager.RoleExistsAsync(SD.AdminEndUser))
-                         await _roleManager.CreateAsync(new IdentityRole(SD.AdminEndUser));
+                    if (!await _roleManager.RoleExistsAsync(SD.AdminEndUser))
+                        await _roleManager.CreateAsync(new IdentityRole(SD.AdminEndUser));
                     if (!await _roleManager.RoleExistsAsync(SD.SuperAdminEndUser))
                         await _roleManager.CreateAsync(new IdentityRole(SD.SuperAdminEndUser));
-                    
 
-                    if(Input.IsSuperAdmin)
-                        await _userManager.AddToRoleAsync(user, SD.SuperAdminEndUser);                    
+                    if (Input.IsSuperAdmin)
+                        await _userManager.AddToRoleAsync(user, SD.SuperAdminEndUser);
                     else
                         await _userManager.AddToRoleAsync(user, SD.AdminEndUser);
                     _logger.LogInformation("User created a new account with password.");

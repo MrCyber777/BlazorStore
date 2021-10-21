@@ -2,19 +2,13 @@
 @page "/product/{PageNumber:int}"
 
 @using BlazorInputFile
-@using System.IO
 @using BlazorStore.Utility
 @using BlazorStore.Extensions
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
-@using System.Text
-
 
 
 @inject ProductService _db
 @inject ProtectedLocalStorage _protectedLocalStorage
-
-
-
 
 @attribute [Authorize(Roles = SD.AdminEndUser + "," + SD.SuperAdminEndUser)]
 
@@ -44,7 +38,7 @@
                 <li class="page-item @((PageNumber<=1)?"disabled":"")">
                     <a class="page-link" href="product/@(PageNumber-1)" aria-disabled="@((PageNumber<=1) ?"true":"false")">Previous</a>
                 </li>
-                @for (int i = 1; i <= SD.PageSize+1; i++)
+                @for (int i = 1; i <= SD.PageSize + 1; i++)
                 {
                     <li class="page-item @((PageNumber==i)?"active":"")"><a class="page-link" href="product/@i">@i</a></li>
                 }
@@ -73,7 +67,7 @@
                         <tr>
                             @if (item.Image is not null)
                             {
-                                <td><img src="@ImageToDisplayConverter(item.Image)" width="100" /></td>
+                                <td><img src="@ToDisplayExtension.ImageToDisplayConverter(item.Image)" width="100" /></td>
                             }
                             else
                             {
@@ -81,17 +75,16 @@
                                     <img src="https://st4.depositphotos.com/1028437/21297/v/600/depositphotos_212975764-stock-illustration-image-available-sign.jpg" width="100" />
                                 </td>
                             }
-                            <td>@item.Name</td>
-                            <td>@item.Category.Name</td>
-                            <td>@item.SpecialTag.Name</td>
-                            <td>@item.Price</td>
+                            <td class="align-middle">@item.Name</td>
+                            <td class="align-middle">@item.Category.Name</td>
+                            <td class="align-middle">@item.SpecialTag.Name</td>
+                            <td class="align-middle">@string.Format("{0:C}", @item.Price)</td>
                             <td>@item.ShadeColor</td>
-                            <td>
+                            <td class="align-middle">
                                 <div class="btn-group">
                                     <button class="btn btn-info" type="button" @onclick="(()=>DetailsProductHandler(item))"> <i class="fas fa-info"></i></button>
                                     <button class="btn btn-primary" type="button" @onclick="(()=>EditProductHandler(item))"><i class="far fa-edit"></i></button>
                                     <button class="btn btn-danger" type="button" @onclick="(()=>DeleteProductHandler(item))"><i class="fas fa-trash"></i></button>
-
                                 </div>
                             </td>
                         </tr>
@@ -123,15 +116,10 @@
     }
 </div>
 
-
 <ProductModal @ref="modal" ProductDetails="productObj" OnCancel="CloseModal" OnConfirm="ValidSubmitHandler" OnHandleSelection="HandleSelection" OnSelectionCategoryChanged="SelectionCategoryChanged" OnSelectionSpecialTagsChanged="SelectionSpecialTagsChanged" Categories="categories" SpecialTags="specialTags" />
-
-
-
 
 @*if (showModal)
     {
-
 
     if (isDetails)
         {
@@ -147,12 +135,8 @@
     }
 *@
 
-
-
-
 @code {
     [Parameter] public int PageNumber { get; set; }
-
 
     List<Product> products;
     List<SpecialTag> specialTags;
@@ -164,6 +148,7 @@
     //bool isDetails = false;
     ModalStateEnum modalState = new();
     ProductModal modal;
+    bool selectionCategoryChanged = false;
 
     //int pageSize = 7;
     int totalCount;
@@ -185,7 +170,6 @@
         products = _db.GetSortedProductsAsync(PageNumber, out totalCount);
     }
 
-
     void AddNewProduct()
     {
         productObj = new();
@@ -204,24 +188,27 @@
     }
     async Task HandleSelection(IFileListEntry[] files)//  Асинхронный метод, который обрабатывает файлы загруженные через форму
     {
-        var file = files.FirstOrDefault();
-        if (file is not null)
-        {
-            MemoryStream memoryStream = new();
-            await file.Data.CopyToAsync(memoryStream);// асинхронно скопировать картинку в ОП
-            ImageUploaded = memoryStream.ToArray();//Преобразование картинки в массив байтов
-            productObj.Image = ImageUploaded;
-        }
+        ImageUploaded = await UploadImageHelper.HandleUpoad(files);
+        productObj.Image = ImageUploaded;
+        //var file = files.FirstOrDefault();
+        //if (file is not null)
+        //{
+        //    MemoryStream memoryStream = new();
+        //    await file.Data.CopyToAsync(memoryStream);// асинхронно скопировать картинку в ОП
+        //    ImageUploaded = memoryStream.ToArray();//Преобразование картинки в массив байтов
+        //    productObj.Image = ImageUploaded;
+        //}
     }
-    string ImageToDisplayConverter(byte[] image)// Метод преобразования массива байтов обратно в картинку
-    {
-        if (image is null)
-            return "";
-        var base64 = Convert.ToBase64String(image);
-        var finalString = string.Format("data:image/jpg;base64,{0}", base64);
 
-        return finalString;
-    }
+    //string ImageToDisplayConverter(byte[] image)// Метод преобразования массива байтов обратно в картинку
+    //{
+    //    if (image is null)
+    //        return "";
+    //    var base64 = Convert.ToBase64String(image);
+    //    var finalString = string.Format("data:image/jpg;base64,{0}", base64);
+
+    //    return finalString;
+    //}
     async Task ValidSubmitHandler(Product _prodDetails)
     {
         bool result = false;
@@ -265,12 +252,19 @@
         modal.Show(modalState);
         //showModal = true;
     }
+
+    // TODO: Объеденить эти 2 метода, оставляя прежний функционал
     void SelectionCategoryChanged(ChangeEventArgs args)
     {
+        selectionCategoryChanged = true;
         if (int.TryParse(args.Value.ToString(), out int id))// Парсинг стринговой переменной в int
         {
             productObj.CategoryId = id;
         }
+        selectionCategoryChanged = false;
+        if(!selectionCategoryChanged)
+            productObj.SpecialTagId = id;
+
     }
     void SelectionSpecialTagsChanged(ChangeEventArgs args)
     {
@@ -298,6 +292,4 @@
         StateHasChanged();
     }
 
-
 }
-

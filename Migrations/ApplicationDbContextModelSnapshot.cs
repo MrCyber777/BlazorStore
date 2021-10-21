@@ -90,6 +90,42 @@ namespace BlazorStore.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("BlazorStore.Data.Models.IPBlackList", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IPBlackLists");
+                });
+
+            modelBuilder.Entity("BlazorStore.Data.Models.MacBlackList", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MacBlackLists");
+                });
+
             modelBuilder.Entity("BlazorStore.Data.Models.OrderDetails", b =>
                 {
                     b.Property<int>("Id")
@@ -498,10 +534,16 @@ namespace BlazorStore.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("IP")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Mac")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Zip")
                         .HasColumnType("int");

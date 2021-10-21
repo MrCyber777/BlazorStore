@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@implements IDisposable
 @inject ProtectedLocalStorage _protectedCart
 
 <div class="top-row pl-4 navbar navbar-dark">
@@ -38,26 +39,36 @@
                 </NavLink>
             </li>
             <li class="nav-item px-3">
-                <NavLink class="nav-link" href="fetchdata">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
+                <NavLink class="nav-link" href="roles">
+                    <span class="oi oi-plus" aria-hidden="true"></span>Manage roles
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="users">
+                    <span class="oi oi-plus" aria-hidden="true"></span>Manage Users
                 </NavLink>
             </li>
             @*<li class="nav-item px-3">
-                <NavLink class="nav-link" href="appointmentbooked">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span>Booked
+                <NavLink class="nav-link" href="fetchdata">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
                 </NavLink>
             </li>*@
+            @*<li class="nav-item px-3">
+            <NavLink class="nav-link" href="appointmentbooked">
+                <span class="oi oi-list-rich" aria-hidden="true"></span>Booked
+            </NavLink>
+        </li>*@
         </AuthorizeView>
     </ul>
-     @if (userInfo.User.IsInRole(SD.User))
-     {
+    @*@if (userInfo.User.IsInRole(SD.User))
+        {*@
     <div class="px-3 text-center">
         <NavLink class="nav-link" href="shoppingcart">
             <span class="oi oi-cart cart-icon" aria-hidden="true"></span>
             <label class="cart">@productCount</label>
         </NavLink>
     </div>
-     }
+    @*}*@
 </div>
 
 
@@ -71,17 +82,27 @@
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
     protected override async Task OnInitializedAsync()
     {
+        SessionExtension.NotifyChanges += ShowChanges;
         userInfo = await authenticationStateTask;
-        
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender)
+        {
+            shoppingCartList = await _protectedCart.GetFromSession<List<int>>(SD.SessionKey);
+            productCount = shoppingCartList is not null && shoppingCartList.Any() ? shoppingCartList.Count : 0;
+            StateHasChanged();
+        }
+    }
 
-        shoppingCartList = await _protectedCart.GetFromSession<List<int>>(SD.SessionKey);
-        productCount = shoppingCartList is not null && shoppingCartList.Any() ? shoppingCartList.Count : 0;
-        StateHasChanged();
-
-
+    void ShowChanges(int count)
+    {
+        productCount = count;
+        InvokeAsync(StateHasChanged);
+    }
+    public void Dispose()
+    {
+        SessionExtension.NotifyChanges -= ShowChanges;
     }
 
     private void ToggleNavMenu()

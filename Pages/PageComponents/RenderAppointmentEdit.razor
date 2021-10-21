@@ -1,5 +1,4 @@
-﻿@typeparam TValue
-@if (showModal)
+﻿@if (showModal)
 {
     <div class="modal-backdrop show"></div>
     <div class="modal" tabindex="-1" style="display:block;">
@@ -15,58 +14,57 @@
                 <div class="modal-body">
                     @*<DataAnnotationsValidator />*@
                     @*<ValidationSummary />*@
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="row form-group">
-                                <div class="col-4">Customer Name</div>
+                    @if (OnAppointmentDetails is not null)
+                    {
+                        <EditForm Model="OnAppointmentDetails" OnValidSubmit="FormHandler">
+                            <div class="row">
                                 <div class="col-8">
-                                    <input class="form-control" @bind="AppointmentDetails.CustomerName" disabled="@readOnly" />
-                                    @*<ValidationMessage For="(() => AppointmentDetails.CustomerName)" />*@
+                                    <div class="row form-group">
+                                        <div class="col-4">Customer Name</div>
+                                        <div class="col-8">
+                                            <input class="form-control" @bind="OnAppointmentDetails.CustomerName" disabled="@readOnly" />
+                                            @*<ValidationMessage For="(() => AppointmentDetails.CustomerName)" />*@
+                                        </div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col-4">Email</div>
+                                        <div class="col-8">
+                                            <input class="form-control" @bind="OnAppointmentDetails.CustomerEmail" disabled="@readOnly" />
+                                            @*<ValidationMessage For="(() =>AppointmentDetails.CustomerEmail)" />*@
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-4">Customer Number</div>
+                                        <div class="col-8">
+                                            <input class="form-control" @bind="OnAppointmentDetails.CustomerPhoneNumber" disabled="@readOnly" />
+                                            @*<ValidationMessage For="(() =>AppointmentDetails.CustomerEmail)" />*@
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-
-                            <div class="row form-group">
-                                <div class="col-4">Email</div>
-                                <div class="col-8">
-                                    <input class="form-control" @bind="AppointmentDetails.CustomerEmail" disabled="@readOnly" />
-                                    @*<ValidationMessage For="(() =>AppointmentDetails.CustomerEmail)" />*@
-                                </div>
-                            </div>
-                            <div class="row form-group">
-                                <div class="col-4">Customer Number</div>
-                                <div class="col-8">
-                                    <input class="form-control" @bind="AppointmentDetails.CustomerPhoneNumber" disabled="@readOnly" />
-                                    @*<ValidationMessage For="(() =>AppointmentDetails.CustomerEmail)" />*@
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
+                            <button type="submit" class="btn btn-dark">Save changes</button>
+                        </EditForm>
+                    }
                     <div class="modal-footer">
-
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="ShowCloseModal">Close</button>
-                        <button type="submit" class="btn btn-primary" @onclick="OnValidSubmitHandler">Save changes</button>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 }
 @code {
 
-    bool showModal = false;
+    public bool showModal = false;
     bool readOnly = false;
 
-    [Parameter] public RenderFragment Header { get; set; }
-    [Parameter] public RenderFragment<TValue> ChildContent { get; set; }
-    [Parameter] public TValue Item { get; set; }
-    [Parameter] public Appointment AppointmentDetails { get; set; }
-    [Parameter] public EventCallback OnValidSubmitHandler { get; set; }
+    [Parameter] public EventCallback<Appointment> OnEditHandler { get; set; }
 
-
+    [Parameter] public Appointment OnAppointmentDetails { get; set; }
 
     public void ShowCloseModal() => showModal = !showModal;
+    public void FormHandler()
+    {
+        OnEditHandler.InvokeAsync(OnAppointmentDetails);
+    }
 }

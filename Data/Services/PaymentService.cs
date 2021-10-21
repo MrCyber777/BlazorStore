@@ -3,10 +3,7 @@ using BlazorStore.Merchant;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace BlazorStore.Data.Services
@@ -15,22 +12,24 @@ namespace BlazorStore.Data.Services
     {
         private readonly ApplicationDbContext _db;
         private readonly IHttpContextAccessor _httpContextAccessor;
+
         public PaymentService(ApplicationDbContext db, IHttpContextAccessor httpContextAccessor)
         {
             _db = db;
             _httpContextAccessor = httpContextAccessor;
-        }  
+        }
+
         public async Task<OrderModel> GetSinglePaymentAsync(int? id)
         {
             if (id is null)
                 return null;
             var paymentFromDB = await _db.Orders.Include(x => x.Customer)
                                                     .Include(x => x.OrderDetails).ThenInclude(x => x.Products)
-                                                    .Include(x=>x.Payment)
+                                                    .Include(x => x.Payment)
                                                     .FirstOrDefaultAsync(x => x.AppointmentId == id);
-            return paymentFromDB;                                           
+            return paymentFromDB;
         }
-      
+
         public async Task<OrderModel> SavePaymentDetailsAsync(PayPalResponse response)
         {
             int appointmentId;
@@ -39,7 +38,7 @@ namespace BlazorStore.Data.Services
                 return null;
             OrderModel orderFromDB = await _db.Orders.Include(x => x.Appointment)
                                                    .Include(x => x.Customer)
-                                                   .Include(x => x.OrderDetails)                                                   
+                                                   .Include(x => x.OrderDetails)
                                                    .FirstOrDefaultAsync(x => x.AppointmentId == appointmentId);
             if (orderFromDB is null)
                 return null;
@@ -57,8 +56,6 @@ namespace BlazorStore.Data.Services
 
             orderFromDB.PaymentId = details.Id;
             await _db.SaveChangesAsync();
-
-
 
             return orderFromDB;
         }

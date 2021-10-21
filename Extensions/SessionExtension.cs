@@ -9,15 +9,28 @@ namespace BlazorStore.Extensions
 {
     public static class SessionExtension
     {
-        public static async Task SetForSession<T>(this ProtectedLocalStorage session,string key,T value)
+        public delegate void NotifyDelegate(int count);
+        public static event NotifyDelegate NotifyChanges;
+
+        public static async Task SetForSession<T>(this ProtectedLocalStorage session, string key, T value)
         {
-            await session.SetAsync(key, JsonSerializer.Serialize(value));// 1) Получаем текущую сессию пользователя. 2) Установи в эту сессию асинхронно ннекоторые значения.
+            await session.SetAsync(key, JsonSerializer.Serialize(value));// 1) Получаем текущую сессию пользователя. 2) Установи в эту сессию асинхронно некоторые значения.
             //1) Параметр ключ для доступа к значениям. 2) Передаем сериализованное в Json формат значения  
+
+            var newList = await session.GetFromSession<List<int>>(key);
+            NotifyChanges?.Invoke(newList.Count);
+            /*
+             void ShowChanges(int count)
+            {
+                productCount = count;
+                InvokeAsync(StateHasChanged);
+            }
+             */
         }
-        public static async Task<T>GetFromSession<T>(this ProtectedLocalStorage session,string key)
+        public static async Task<T> GetFromSession<T>(this ProtectedLocalStorage session, string key)
         {
             var value = await session.GetAsync<string>(key);
-            return  (value.Value == null) ? default : JsonSerializer.Deserialize<T>(value.Value);
+            return (value.Value == null) ? default : JsonSerializer.Deserialize<T>(value.Value);
         }
     }
 }

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlazorStore.Data.Models
 {
@@ -12,6 +9,5 @@ namespace BlazorStore.Data.Models
         public int ProductId { get; set; }
         public string UserId { get; set; }
         public DateTime CreateAt { get; set; }
-
     }
 }

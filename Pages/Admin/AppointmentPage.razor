@@ -35,7 +35,6 @@
     {
         <div class="row">
 
-
             <table class="table table-striped">
                 <thead class="bg-info">
                     <tr>
@@ -44,6 +43,7 @@
                         <th>Customer Number</th>
                         <th>Customer Email</th>
                         <th>Is Confirmed</th>
+                        <th></th>
                     </tr>
                 </thead>
 
@@ -55,10 +55,15 @@
                             <td>@item.AppointmentDay</td>
                             <td>@item.CustomerPhoneNumber</td>
                             <td>@item.CustomerEmail</td>
-
+                            <td>
+                                @if (item.IsConfirmed)
+                                {
+                                    <img src="data:image/jpeg;base64,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" style="height:70px;" />
+                                }
+                            </td>
                             <td>
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-success"><i class="far fa-check-circle"></i></button>
+                                    <button type="button" class="btn btn-success" @onclick="()=>ConfirmAppointment(item.Id)"><i class="far fa-check-circle"></i></button>
                                     <button type="button" class="btn btn-primary" @onclick="()=>EditAppointmentHandler(item)"><i class="fas fa-edit"></i></button>
                                     <button type="button" class="btn btn-warning" @onclick="() => ShowProducts(item.Id)"><i class="fas fa-list"></i></button>
                                     <button type="button" class="btn btn-dark" @onclick="()=>ShowPaymentDetails(item.Id)"><i class="fas fa-info-circle"></i></button>
@@ -82,8 +87,6 @@
                     </tr>
                 </tfoot>
             </table>
-
-
         </div>
     }
     else
@@ -102,7 +105,7 @@
             }
             else
             {
-                <AddEditModalAppointment appointmentObj="appointmentObj" OnCloseModal="CloseModal" OnValidSubmitHandler="ValidSubmitHandler"/>
+                <AddEditModalAppointment appointmentObj="appointmentObj" OnCloseModal="CloseModal" OnValidSubmitHandler="ValidSubmitHandler" />
             }
         }*@
 </div>
@@ -111,7 +114,7 @@
 @*<AppointmentModal @ref="modal" AppointmentDetails="appointmentObj" OnConfirm="ValidSubmitHandler" OnHandleSelection="HandleSelection" />*@
 @*<DetailsModalProduct @ref="modal" ProductDetails="productObj" OnCancel="CloseModal" />
     <EditAppointmentModal @ref="_editAppointmentModal" AppointmentDetails="appointmentObj" OnValidSubmitHandler="ValidSubmitHandler" OnCancel="CloseModal" />*@
-@*<DetailsPaymentModal @ref="detailsPaymentModal" PaymenDetails="paymentObj" OnValidSubmitHandler="SubmitHandler" OnCancel="CloseModal"/>*@
+@*<DetailsPaymentModal @ref="detailsPaymentModal" PaymenDetails="paymentObj" OnValidSubmitHandler="SubmitHandler" OnCancel="CloseModal" />*@
 <RenderProducts Items="productsInCurrentAppointment" Context="OrderDetails" @ref="renderModal">
     <Header>
         <div class="row bg-info position-sticky align-items-center text-center" style="height: 50px">
@@ -172,48 +175,38 @@
         <hr />
     </ChildContent>
 </RenderPaymentDetails>
-
-
-
-
-
+<RenderAppointmentEdit @ref="renderAppointmentEditModal" OnAppointmentDetails="appointmentObj" OnEditHandler="ValidEditHandler" />
 
 @code {
     List<Appointment> appointments;
     List<Product> products;
     List<OrderDetails> productsInCurrentAppointment;
+
     OrderModel currentOder;
+    Appointment currentAppointment;
 
     RenderProducts<OrderDetails> renderModal;
-    RenderAppointmentEdit<OrderDetails> renderAppointmentEditModal;
+    RenderAppointmentEdit renderAppointmentEditModal;
     RenderPaymentDetails<OrderModel> renderPaymentModal;
 
-
     [Parameter] public List<Product> Products { get; set; }
-
-
-
 
     Appointment appointmentObj = new();
     Product productObj = new();
     bool showModal = false;
     public byte[] ImageUploaded { get; set; }
     string message = string.Empty;
+
     //bool isEdit = false;
 
     ModalStateEnum modalState = new();
     DetailsModalProduct modal;
     EditAppointmentModal _editAppointmentModal;
 
-
-
-
-
     protected override async Task OnInitializedAsync()
     {
         appointments = await _db.GetAllAppointmentsAsync();
     }
-
 
     void CloseModal()
     {
@@ -225,6 +218,8 @@
     }
     async Task ValidSubmitHandler()
     {
+        if (renderAppointmentEditModal.showModal)
+            renderAppointmentEditModal.ShowCloseModal();
         _editAppointmentModal.Hide();
         //detailsPaymentModal.Hide();
         if (appointmentObj.Id.Equals(0))
@@ -234,6 +229,26 @@
         else
         {
             var result = await _db.UpdateAppointmentAsync(appointmentObj);
+        }
+        appointments = await _db.GetAllAppointmentsAsync();
+    }
+    async Task ConfirmAppointment(int id)
+    {
+        var result = await _db.ConfirmAppointmentAsync(id);
+        appointments = await _db.GetAllAppointmentsAsync();
+    }
+    async Task ValidEditHandler(Appointment editedAppointment)
+    {
+        if (renderAppointmentEditModal.showModal)
+            renderAppointmentEditModal.ShowCloseModal();
+
+        if (editedAppointment.Id.Equals(0))
+        {
+            var result = await _db.CreateAppointmentAsync(editedAppointment, Products);
+        }
+        else
+        {
+            var result = await _db.UpdateAppointmentAsync(editedAppointment);
         }
         appointments = await _db.GetAllAppointmentsAsync();
     }
@@ -265,12 +280,13 @@
     //    //    }
     //    //appointments = await _db.GetAllAppointmentsAsync();
     //}
-    void EditAppointmentHandler(Appointment appointmentForEdition)
+    void EditAppointmentHandler(Appointment appointmentEdited)
     {
-        appointmentObj = appointmentForEdition;
+        appointmentObj = appointmentEdited;
 
         modalState = ModalStateEnum.Update;
-        _editAppointmentModal.Show(modalState);
+        renderAppointmentEditModal.ShowCloseModal();
+        //_editAppointmentModal.Show(modalState);
         //isEdit = true;
         //showModal = true;
     }

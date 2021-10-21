@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BlazorStore.Merchant
 {
@@ -19,17 +16,20 @@ namespace BlazorStore.Merchant
         {
             public string payment_method { get; set; }
         }
+
         public class Transaction
         {
-           public Amount amount { get; set; }
-           public  object[] related_resources { get; set; }
-           public string description { get; set; }
+            public Amount amount { get; set; }
+            public object[] related_resources { get; set; }
+            public string description { get; set; }
         }
+
         public class Amount
         {
             public string total { get; set; }
             public string currency { get; set; }
         }
+
         public class Link
         {
             public string href { get; set; }//адрес запроса
